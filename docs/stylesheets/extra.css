@@ -1,0 +1,1112 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,700&family=Roboto+Slab:wght@300;400;600;700&family=Noto+Color+Emoji&display=swap');
+
+/* ==============================================================================
+   Brand Typography (Roboto Slab, Nunito & Noto Color Emoji)
+   ============================================================================== */
+:root {
+  /* Site-wide body font */
+  --md-text-font: "Nunito", "Noto Color Emoji", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif !important;
+  --md-primary-fg-color: #880e4f; /* Darker magenta for standard text */
+  --md-typeset-a-color: #880e4f; 
+  --md-nav-item-color--active: #d81b60; /* Higher contrast active state */
+}
+
+/* Headings, Brand Titles & Top Tabs (Roboto Slab) */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.md-header__title,
+.md-nav__title,
+.md-nav__link--active,
+.md-footer-meta__title,
+.md-banner,
+.md-tabs__link {
+  font-family: "Roboto Slab", "Noto Color Emoji", Georgia, serif !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure Top Navigation Tabs (Home & API Reference) use one of the main fonts */
+.md-tabs__link,
+.md-tabs__item a {
+  font-family: "Roboto Slab", "Noto Color Emoji", Georgia, serif !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure strong heading highlights on hover */
+h1:hover,
+h2:hover,
+h3:hover,
+h4:hover,
+h5:hover,
+h6:hover {
+  font-weight: 700 !important;
+}
+
+/* Base Body and Monospace Font Adjustments */
+body {
+  font-family: "Nunito", "Noto Color Emoji", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+kbd,
+pre {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Noto Color Emoji', monospace;
+}
+
+/* Reduce the font for all markdown text slightly */
+.md-typeset {
+  font-size: 0.76rem !important;
+}
+
+/* Reduce the font for all code blocks in markdown considerably */
+.md-typeset pre,
+.md-typeset pre code,
+.md-typeset .highlight pre,
+.md-typeset .highlight code,
+.jp-Notebook pre,
+.jp-Notebook .CodeMirror,
+.jp-Notebook .jp-Editor,
+.jp-Notebook .jp-InputArea-editor {
+  font-size: 0.65rem !important;
+}
+
+/* Custom Shell Command Admonition (Collapsible Details) */
+.md-typeset details.shell {
+  background-color: #fff0f3 !important;
+  /* Premium light pink background */
+  border: 1px solid #ffccd5 !important;
+  /* Soft pink border */
+  border-radius: 6px !important;
+  margin: 12px 0 !important;
+  font-size: 0.72rem !important;
+  /* Small'ish font size */
+}
+
+/* Light mode overrides */
+[data-md-color-scheme="default"] .md-typeset details.shell {
+  background-color: #fff0f3 !important;
+  border-color: #ffccd5 !important;
+}
+
+/* Dark/Slate mode overrides to fit slate color scheme beautifully */
+[data-md-color-scheme="slate"] .md-typeset details.shell {
+  background-color: #2b1d22 !important;
+  /* Dark plum/pink background for contrast */
+  border-color: #5c2c3a !important;
+  /* Muted plum border */
+}
+
+.md-typeset details.shell>summary {
+  cursor: pointer !important;
+  font-weight: 700 !important;
+  color: #e79eb2 !important;
+  /* Pastel pink header text */
+  outline: none !important;
+  padding: 0.5rem 0.5rem 0.5rem 2rem !important;
+  /* Indent using rem to scale proportionally */
+  border-bottom: none !important;
+  background-color: rgba(255, 240, 243, 0.648) !important;
+  position: relative !important;
+}
+
+.md-typeset details.shell[open]>summary {
+  border-bottom: 1px solid rgba(255, 204, 213, 0.5) !important;
+}
+
+/* Custom CLI/Terminal icon using mask */
+.md-typeset details.shell>summary::before {
+  background-color: #e79eb2 !important;
+  /* Pastel pink logo */
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,19H4c-1.1,0-2-0.9-2-2V7c0-1.1,0-2,2-2h16c1.1,0,2,0.9,2,2v10C22,18.1,21.1,19,20,19z M4,7v10h16V7H4z M6,9h4v2H6V9z M6,13h8v2H6V13z"/></svg>') !important;
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,19H4c-1.1,0-2-0.9-2-2V7c0-1.1,0-2,2-2h16c1.1,0,2,0.9,2,2v10C22,18.1,21.1,19,20,19z M4,7v10h16V7H4z M6,9h4v2H6V9z M6,13h8v2H6V13z"/></svg>') !important;
+  position: absolute !important;
+  left: 0.5rem !important;
+  top: 0.5rem !important;
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset details.shell>summary {
+  background-color: rgba(43, 29, 34, 0.5) !important;
+  color: #e79eb2 !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset details.shell[open]>summary {
+  border-bottom: 1px solid rgba(92, 44, 58, 0.5) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset details.shell>summary::before {
+  background-color: #e79eb2 !important;
+}
+
+/* Adjust nested pre/code spacing */
+.md-typeset details.shell pre {
+  margin: 8px 12px 12px 12px !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(255, 204, 213, 0.5) !important;
+  border-radius: 4px !important;
+  padding: 6px 10px !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset details.shell pre {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(92, 44, 58, 0.5) !important;
+}
+
+.md-typeset details.shell code {
+  color: #613743 !important;
+  /* Deep red/plum for command text */
+  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+  font-size: 0.65rem !important;
+  /* Even smaller font size for command text */
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset details.shell code {
+  color: #ffccd5 !important;
+  /* Light rose color for code text in dark mode */
+}
+
+/* ==============================================================================
+   Light Mode Color Palette
+   ============================================================================== */
+:root,
+[data-md-color-scheme="default"],
+[data-md-color-primary="custom"],
+[data-md-color-accent="custom"] {
+  /* Brand Plum/Burgundy tones */
+  --md-primary-fg-color: #7d2a44;
+  /* #7d2a44 burgundy primary */
+  --md-primary-fg-color--light: #913b56;
+  /* lighter burgundy for hover states */
+  --md-primary-fg-color--dark: #4a2339;
+  /* #4a2339 dark plum */
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--active: #f8f1f3;
+
+  /* Accent elements */
+  --md-accent-fg-color: #7d2a44;
+  --md-accent-fg-color--transparent: rgba(125, 42, 68, 0.1);
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--active: #f8f1f3;
+
+  /* Body Text adjustments to match primary website */
+  --md-typeset-color: #3f4650;
+  /* #3f4650 dark slate text */
+  --md-default-fg-color: #3f4650;
+  --md-default-fg-color--light: #545e6c;
+  /* muted slate text */
+
+  /* Link Color */
+  --md-typeset-a-color: #7d2a44;
+}
+
+/* Make sure custom theme is selected correctly */
+.md-header {
+  background-color: #7d2a44 !important;
+}
+
+.md-tabs {
+  background-color: #7d2a44 !important;
+}
+
+/* ==============================================================================
+   Dark Mode Color Palette (Slate Theme overrides)
+   ============================================================================== */
+[data-md-color-scheme="slate"] {
+  /* Accessible lighter Plum/Burgundy tones for dark backgrounds */
+  --md-primary-fg-color: #913b56;
+  --md-primary-fg-color--light: #a6536b;
+  --md-primary-fg-color--dark: #7d2a44;
+
+  /* Accent elements in dark mode */
+  --md-accent-fg-color: #bc7085;
+  /* rose-gold burgundy */
+  --md-accent-fg-color--transparent: rgba(188, 112, 133, 0.15);
+
+  /* Keep standard dark mode background/foreground for visibility, but accent link colors with primary colors */
+  --md-typeset-a-color: #bc7085;
+}
+
+/* ==============================================================================
+   Custom Design Enhancements & Micro-animations
+   ============================================================================== */
+/* Premium smooth transitions */
+a,
+button,
+.md-nav__link,
+.md-search-result__link {
+  transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Styled active tabs */
+.md-tabs__link--active {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(125, 42, 68, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(125, 42, 68, 0.6);
+}
+
+/* ==============================================================================
+   Sidebar Navigation Overrides
+   ============================================================================== */
+/* Style Module Titles (Black in Light Mode, White in Dark Mode, Bold, with bottom line fading to transparent on the right) */
+.md-nav__item--section>.md-nav__link,
+.md-nav__item--nested>.md-nav__link {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  margin-top: 14px !important;
+  display: flex !important;
+  width: 100% !important;
+  border-bottom: none !important;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.25), transparent) !important;
+  background-size: 100% 1.5px !important;
+  background-repeat: no-repeat !important;
+  background-position: bottom left !important;
+  padding-bottom: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Dark Mode Module Titles Override (White text & white fading line in Slate Mode) */
+[data-md-color-scheme="slate"] .md-nav__item--section>.md-nav__link,
+[data-md-color-scheme="slate"] .md-nav__item--nested>.md-nav__link {
+  color: #ffffff !important;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.25), transparent) !important;
+}
+
+/* Indent Sidebar Sub-items slightly (left-padded by 1.2rem) */
+.md-nav--primary .md-nav__list {
+  padding-left: 1.2rem !important;
+  border-left: 2px solid transparent !important;
+}
+
+.md-nav--primary .md-nav__list:hover {
+  padding-left: calc(1.2rem - 2px) !important;
+}
+
+.md-nav--primary .md-nav__list {
+  padding-left: calc(1.2rem - 2px) !important;
+  font-weight: 600 !important;
+}
+
+/* ==============================================================================
+   MkDocstrings Examples Section Overrides
+   ============================================================================== */
+/* Hide the redundant "Examples:" section header generated by mkdocstrings */
+p:has(> .doc-section-title):has(+ details.example) {
+  display: none;
+}
+
+/* Hide the repository statistics (stars, forks) from the top navigation header */
+.md-header__source .md-source__fact,
+.md-source__facts {
+  display: none !important;
+}
+
+/* Custom mathbox / Collapsible Admonitions */
+.md-typeset .admonition.mathbox,
+.md-typeset details.mathbox,
+.md-typeset .admonition.mathematical,
+.md-typeset details.mathematical {
+  border-color: #e91e63 !important;
+}
+
+.md-typeset .mathbox>.admonition-title,
+.md-typeset details.mathbox>summary,
+.md-typeset .mathematical>.admonition-title,
+.md-typeset details.mathematical>summary {
+  background-color: rgba(233, 30, 99, 0.08) !important;
+  border-color: #e91e63 !important;
+}
+
+.md-typeset .mathbox>.admonition-title::before,
+.md-typeset details.mathbox>summary::before,
+.md-typeset .mathematical>.admonition-title::before,
+.md-typeset details.mathematical>summary::before {
+  background-color: #e91e63 !important;
+}
+
+/* ==============================================================================
+   Homepage & Interactive Layout Components
+   ============================================================================== */
+
+/* Hero Section */
+.custom-hero {
+  background: linear-gradient(135deg, #7d2a44 0%, #4e1122 100%);
+  color: #ffffff;
+  padding: 2.5rem 2.0rem;
+  border-radius: 12px;
+  margin-bottom: 2.0rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(125, 42, 68, 0.15);
+}
+
+.custom-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-hero h1 {
+  color: #ffffff !important;
+  font-size: 2.0rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.8rem !important;
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 700px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none !important;
+}
+
+.hero-btn.btn-primary {
+  background-color: #ffffff;
+  color: #7d2a44 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero-btn.btn-primary:hover {
+  background-color: #f8f1f3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.hero-btn.btn-outline {
+  background-color: transparent;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+.hero-btn.btn-outline:hover {
+  border-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Feature Grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.feature-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(125, 42, 68, 0.08);
+  border-radius: 10px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(125, 42, 68, 0.08);
+  border-color: rgba(125, 42, 68, 0.3);
+}
+
+.card-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.8rem;
+  color: #7d2a44;
+  background: rgba(125, 42, 68, 0.06);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.feature-card h3 {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.6rem !important;
+  color: #7d2a44 !important;
+}
+
+.feature-card p {
+  font-size: 0.8rem;
+  color: #5c5c64;
+  line-height: 1.4;
+  margin: 0 0 0.8rem 0;
+  flex-grow: 1;
+}
+
+.feature-card ul {
+  margin: 0 !important;
+  padding-left: 1.2rem !important;
+  font-size: 0.75rem;
+  color: #4a4a50;
+}
+
+.feature-card li {
+  margin-bottom: 0.4rem;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-badge.completed {
+  background-color: #e6f7ed;
+  color: #1f8b4c;
+  border: 1px solid #ccefd9;
+}
+
+.status-badge.completed::before {
+  background-color: #2e7d32;
+}
+
+.status-badge.upcoming {
+  background-color: #fff8e6;
+  color: #b27a00;
+  border: 1px solid #ffecc0;
+}
+
+.status-badge.upcoming::before {
+  background-color: #f57c00;
+}
+
+/* Terminal Window Component */
+.terminal-window {
+  background-color: #1a1a1e;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  margin: 1.5rem 0;
+  overflow: hidden;
+  border: 1px solid #2d2d34;
+}
+
+.terminal-header {
+  background-color: #25252b;
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2d2d34;
+}
+
+.terminal-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-btn {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-btn.close {
+  background-color: #ff5f56;
+}
+
+.terminal-btn.minimize {
+  background-color: #ffbd2e;
+}
+
+.terminal-btn.maximize {
+  background-color: #27c93f;
+}
+
+.terminal-title {
+  color: #a1a1aa;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+.terminal-body {
+  padding: 1.0rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #e4e4e7;
+}
+
+.terminal-body pre {
+  margin: 0 !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+.terminal-prompt {
+  color: #9c3c58;
+  font-weight: bold;
+}
+
+.terminal-command {
+  color: #ffffff;
+}
+
+.terminal-comment {
+  color: #71717a;
+}
+
+/* Notebook Cells adjustments */
+.jp-Notebook {
+  padding: 1.5rem;
+  background-color: var(--md-card-bg-color, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+}
+
+.jp-Cell {
+  margin-bottom: 1rem;
+  border-left: 3px solid transparent;
+}
+
+.jp-Cell:hover {
+  border-left-color: var(--md-accent-fg-color);
+}
+
+.jp-InputPrompt,
+.jp-OutputPrompt {
+  font-size: 0.75rem;
+  color: #7c7c82;
+}
+
+/* General Typeset overrides */
+.md-typeset a {
+  color: var(--md-primary-fg-color);
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.md-typeset a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Roadmap Grid Layout */
+.roadmap-section {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.2rem;
+  border: 1px solid #f0f0f2;
+  margin-bottom: 2.0rem;
+}
+
+.roadmap-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar-container {
+  flex-grow: 1;
+  background-color: #e4e4e7;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: #7d2a44;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .roadmap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.roadmap-item {
+  background-color: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 0.8rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  transition: border-color 0.2s ease;
+}
+
+.roadmap-item:hover {
+  border-color: rgba(125, 42, 68, 0.4);
+}
+
+.roadmap-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #7d2a44;
+  background: rgba(125, 42, 68, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 28px;
+  text-align: center;
+}
+
+.roadmap-content {
+  flex-grow: 1;
+}
+
+.roadmap-content h4 {
+  margin: 0 0 0.4rem 0 !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+}
+
+.roadmap-content p {
+  margin: 0 !important;
+  font-size: 0.75rem;
+  color: #5c5c64;
+  line-height: 1.4;
+}
+
+/* Header Live Tracker Box (2-row x 3-col compact grid) */
+.header-tracker-box {
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(85px, auto));
+  grid-gap: 3px 12px;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff !important;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  margin-left: 14px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  align-self: center;
+  line-height: 1.2;
+  backdrop-filter: blur(4px);
+}
+
+.header-tracker-box:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25);
+}
+
+.header-tracker-box .tracker-cell {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.header-tracker-box .tracker-icon {
+  font-size: 0.70rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.header-tracker-box .tracker-label {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.header-tracker-box .tracker-val {
+  color: #ffffff;
+}
+
+/* Hide tracker box on mobile and tablet screen widths */
+@media screen and (max-width: 960px) {
+  .header-tracker-box {
+    display: none !important;
+  }
+}
+
+/* ==============================================================================
+   Homepage Typography Scoping & Clean UI Density (Smaller, Cleaner Layout)
+   ============================================================================== */
+
+/* Scoped Home Page H2 Headings */
+.homepage-container h2 {
+  font-size: 1.15rem !important;
+  margin-top: 1.8rem !important;
+  margin-bottom: 0.6rem !important;
+  color: #7d2a44 !important;
+}
+
+/* Home Page Scoped Intro Paragraph */
+.homepage-intro {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #4a525d;
+  margin-bottom: 1.8rem;
+  text-align: left;
+}
+
+/* Custom Hero Layout Reductions */
+.custom-hero {
+  padding: 1.8rem 1.4rem !important;
+  margin-bottom: 1.4rem !important;
+  box-shadow: 0 6px 20px rgba(125, 42, 68, 0.12) !important;
+}
+
+.custom-hero h1 {
+  font-size: 1.55rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.hero-subtitle {
+  font-size: 0.82rem !important;
+  line-height: 1.4 !important;
+  margin-bottom: 1.2rem !important;
+}
+
+.hero-badge {
+  padding: 0.2rem 0.6rem !important;
+  font-size: 0.72rem !important;
+  margin-bottom: 0.8rem !important;
+}
+
+.hero-btn {
+  padding: 0.45rem 1.0rem !important;
+  font-size: 0.78rem !important;
+  border-radius: 6px !important;
+}
+
+/* Scoped Feature Grid & Cards (Border-free flat column text) */
+.feature-grid {
+  gap: 1.5rem !important;
+  margin-top: 1.2rem !important;
+  margin-bottom: 2.0rem !important;
+}
+
+.feature-card {
+  padding: 0.5rem 0.2rem !important;
+  border: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: none !important;
+  display: block !important;
+}
+
+.feature-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+.card-icon {
+  font-size: 1.1rem !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin-bottom: 0.5rem !important;
+  border-radius: 6px !important;
+}
+
+.feature-card h3 {
+  font-size: 0.88rem !important;
+  margin-bottom: 0.4rem !important;
+}
+
+.feature-card p {
+  font-size: 0.74rem !important;
+  margin-bottom: 0.6rem !important;
+  line-height: 1.35 !important;
+  flex-grow: 0 !important;
+}
+
+.feature-card ul {
+  font-size: 0.72rem !important;
+  padding-left: 1.0rem !important;
+}
+
+.feature-card li {
+  margin-bottom: 0.3rem !important;
+}
+
+/* Scoped Roadmap Container & Items (Clickable Block Links) */
+.roadmap-section {
+  padding: 0.9rem !important;
+  margin-bottom: 1.5rem !important;
+  border-radius: 8px !important;
+}
+
+.roadmap-grid {
+  gap: 0.9rem !important;
+}
+
+.roadmap-item {
+  padding: 0.6rem !important;
+  gap: 0.6rem !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  display: flex !important;
+  align-items: flex-start;
+  transition: border-color 0.25s ease, background-color 0.25s ease !important;
+}
+
+.roadmap-item:hover {
+  border-color: rgba(125, 42, 68, 0.45) !important;
+  background-color: rgba(125, 42, 68, 0.02) !important;
+}
+
+.roadmap-item:hover h4 {
+  text-decoration: underline !important;
+}
+
+.roadmap-num {
+  font-size: 0.85rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  min-width: auto !important;
+  margin-top: 1px !important;
+}
+
+.roadmap-content h4 {
+  font-size: 0.78rem !important;
+  margin-bottom: 0.2rem !important;
+  color: var(--md-typeset-a-color, #7d2a44) !important;
+}
+
+.roadmap-content p {
+  font-size: 0.70rem !important;
+  line-height: 1.35 !important;
+  color: var(--md-default-fg-color, #3f4650) !important;
+}
+
+/* Scoped Terminal Mock (Smaller, Cleaner Layout) */
+.terminal-window {
+  margin: 1.0rem 0 !important;
+  border-radius: 6px !important;
+}
+
+.terminal-header {
+  padding: 0.4rem 0.8rem !important;
+}
+
+.terminal-title {
+  font-size: 0.72rem !important;
+}
+
+.terminal-body {
+  padding: 0.8rem !important;
+  font-size: 0.72rem !important;
+  line-height: 1.4 !important;
+}
+
+/* Hide raw code blocks in rendered Jupyter Mermaid containers */
+.jp-RenderedMermaid>pre,
+.jp-RenderedMermaid>pre.jp-Mermaid-code {
+  display: none !important;
+}
+
+/* Beautiful card container styling for rendered Mermaid diagrams on notebook pages */
+.jp-RenderedMermaid {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  margin: 1.0rem 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow-x: auto !important;
+  width: 100% !important;
+  max-height: none !important;
+}
+
+/* Dark mode adjustment for the container */
+[data-md-color-scheme="slate"] .jp-RenderedMermaid {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Make sure the figure and rendered image/svg are centered and scale beautifully */
+.jp-RenderedMermaid figure {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-height: none !important;
+}
+
+.jp-RenderedMermaid img,
+.jp-RenderedMermaid svg {
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* ==============================================================================
+   Mermaid Zoom / Expandable Overlay Styles
+   ============================================================================== */
+.mermaid,
+.jp-RenderedMermaid {
+  cursor: zoom-in !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mermaid:hover,
+.jp-RenderedMermaid:hover {
+  transform: scale(1.015);
+  box-shadow: 0 8px 24px rgba(125, 42, 68, 0.12) !important;
+}
+
+/* Fullscreen expanded state */
+.mermaid.mermaid-expanded,
+.jp-RenderedMermaid.mermaid-expanded {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  z-index: 99999 !important;
+  background-color: rgba(15, 15, 18, 0.93) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 3rem !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  cursor: zoom-out !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+/* Center elements and scale correctly */
+.mermaid.mermaid-expanded svg,
+.mermaid.mermaid-expanded img,
+.jp-RenderedMermaid.mermaid-expanded svg,
+.jp-RenderedMermaid.mermaid-expanded img {
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin: auto !important;
+  padding: 1.5rem !important;
+  box-sizing: border-box !important;
+  background-color: var(--md-default-bg-color, #ffffff) !important;
+  border: 1px solid rgba(125, 42, 68, 0.15) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 8px !important;
+}
+
+/* Specific details for notebooks with figure wrappers */
+.jp-RenderedMermaid.mermaid-expanded figure {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Prevent body scrolling when a diagram is zoomed */
+body.mermaid-expanded-active {
+  overflow: hidden !important;
+}
+
+/* Remove footer bottom banner and "Made with Material for MkDocs" branding */
+.md-copyright,
+.md-footer-meta {
+  display: none !important;
+}

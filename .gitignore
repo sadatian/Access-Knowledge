@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation build outputs & cache
+site/
+.cache/
+
+# Local Vector Databases & Temporary Indexes
+*.chroma/
+*.faiss
+*.index
+*.sqlite3
+
+# OS / Editor files
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,165 @@
+# Knowledge Retrieval A-Z: Project Instructions & Roadmap
+
+Welcome to the **Knowledge Retrieval A-Z** repository blueprint. This document outlines the roadmap, coding standards, local LLM protocols, and architectural guidelines for the interactive knowledge retrieval curriculum.
+
+---
+
+## 1. Project Goal & Design Philosophy
+
+The purpose of this project is to provide a complete, hands-on, step-by-step masterclass on modern **Knowledge Retrieval & Augmentation Systems** for Large Language Models.
+
+Rather than reading passive text, tutorials are written as **interactive, celled Python files (`.py`)** utilizing the `# %%` Jupytext percent format.
+
+These scripts serve two key purposes:
+1. **Interactive Execution:** Users can execute them cell-by-cell in an IDE interactive window (VS Code, PyCharm, Antigravity IDE).
+2. **Auto-compiled Documentation:** `mkdocs` compiles these files into rich HTML notebooks at build time via `mkdocs-jupyter`.
+
+---
+
+## 2. Core Technical Guidelines
+
+### 2.1 Dependency Management
+- All Python packages must be managed using `uv`.
+- Virtual environments and lockfiles are synchronized using `uv sync`.
+- Run commands with `uv run python <script_path>`.
+
+### 2.2 Python Script Cell Formatting (`# %%`)
+- Always use standard Jupytext percent format for scripts.
+- Text blocks reside in markdown cells:
+  ```python
+  # %% [markdown]
+  # # Title of the Section
+  # Explanatory markdown content here...
+  ```
+- Executable blocks reside in standard code cells:
+  ```python
+  # %%
+  import numpy as np
+  print("Running Knowledge Retrieval module...")
+  ```
+
+### 2.3 Local LLM API Routing
+- Any LLM calls are routed directly to `http://localhost:5055/v1` using the standard OpenAI client:
+  ```python
+  from openai import OpenAI
+  client = OpenAI(base_url="http://localhost:5055/v1", api_key="dummy")
+  ```
+- Never make requests to external cloud endpoints.
+
+---
+
+## 3. Module Roadmap & Curriculum Checklist
+
+### Track 1: Foundations & Classical Retrieval
+#### Module 01: Modern Retrieval Workspace Setup (`uv`, environment, test rigs, tokenizers)
+- [ ] Initialize Python environment and dependencies with `uv`.
+- [ ] Explore tokenizer mechanics, context windows, and embeddings math.
+- [ ] Establish foundational benchmarking harness.
+
+#### Module 02: Dense vs Sparse Retrieval & Hybrid Search
+- [ ] Implement Sparse Search (BM25 / TF-IDF) with inverted indexes.
+- [ ] Implement Dense Semantic Search with embedding models.
+- [ ] Fuse sparse and dense scores using Reciprocal Rank Fusion (RRF) and convex combination.
+
+#### Module 03: Vector Databases & Indexing Strategies
+- [ ] Analyze vector indexing algorithms: Exact KNN vs Flat, IVF, HNSW, and PQ.
+- [ ] Implement and evaluate vector stores (Chroma, FAISS, Qdrant).
+- [ ] Benchmark recall vs search latency tradeoffs.
+
+---
+
+### Track 2: Retrieval-Augmented Generation (RAG) Architecture
+#### Module 04: Advanced Chunking & Ingestion Strategies
+- [ ] Compare fixed-size, sentence-level, recursive character, and semantic chunking.
+- [ ] Implement hierarchical and parent-child document chunking.
+- [ ] Handle multi-format ingestion (Markdown, PDF, Code, Tables).
+
+#### Module 05: Query Transformation & Multi-Query Routing
+- [ ] Implement Query Rewriting, Expansion, and Step-Back Prompting.
+- [ ] Build Hypothetical Document Embeddings (HyDE) generation and retrieval.
+- [ ] Construct semantic routing between specialized vector collections.
+
+#### Module 06: Context Reranking & Compression
+- [ ] Apply Cross-Encoder rerankers (e.g., BGE-Reranker, Cohere-style) to top-$K$ candidates.
+- [ ] Implement Contextual Compression & LLMLingua prompt token pruning.
+- [ ] Resolve the "Lost in the Middle" attention degradation phenomenon.
+
+#### Module 07: Modular, Corrective (CRAG) & Self-RAG
+- [ ] Build Corrective RAG (CRAG) with retrieval evaluator & web-search fallback.
+- [ ] Construct Self-RAG reflection tokens (`[Retrieve]`, `[IsRel]`, `[IsSup]`, `[IsUse]`).
+- [ ] Design Adaptive RAG routing based on query complexity.
+
+---
+
+### Track 3: Cache-Augmented Generation (CAG) & Long-Context Architectures
+#### Module 08: Cache-Augmented Generation (CAG) Patterns
+- [ ] Understand Key-Value (KV) Cache architectures in LLM decoders.
+- [ ] Implement persistent prefix caching and preloaded context sessions.
+- [ ] Benchmark latency and throughput improvements of CAG vs standard RAG.
+
+#### Module 09: Long-Context LLMs vs RAG Tradeoff Analysis
+- [ ] Compare 1M+ token context ingestion vs dynamic chunk retrieval.
+- [ ] Run "Needle in a Haystack" (NIAH) retrieval depth tests.
+- [ ] Formulate cost-latency-accuracy decision matrices for RAG vs Long-Context.
+
+---
+
+### Track 4: Knowledge-Augmented Generation (KAG) & Graph Retrieval
+#### Module 10: Knowledge Graphs & Triplet Extraction
+- [ ] Extract Entities and Relations from unstructured text using local LLMs.
+- [ ] Build and query Knowledge Graphs with NetworkX / Neo4j interfaces.
+- [ ] Perform multi-hop graph traversals and relational reasoning.
+
+#### Module 11: GraphRAG & Hybrid Knowledge Fusion
+- [ ] Implement GraphRAG community detection and hierarchical summaries.
+- [ ] Perform Global Search (dataset-wide themes) vs Local Search (entity neighborhoods).
+- [ ] Fuse vector embedding similarity with graph topology paths.
+
+---
+
+### Track 5: Fine-Tuning for Retrieval & Knowledge Infusion
+#### Module 12: Embedding Model Fine-Tuning
+- [ ] Construct contrastive training pairs and triplets (Query, Positive, Hard Negative).
+- [ ] Fine-tune embeddings using Multiple Negatives Ranking Loss (MNRL).
+- [ ] Evaluate domain adaptation metrics (MTEB / custom validation sets).
+
+#### Module 13: Parameter-Efficient Fine-Tuning (PEFT / LoRA) for Knowledge Infusion
+- [ ] Understand LoRA (Low-Rank Adaptation) and QLoRA quantization mechanics.
+- [ ] Prepare domain instruction datasets for internal knowledge infusion.
+- [ ] Compare parametric knowledge retention vs non-parametric retrieval.
+
+#### Module 14: Direct Preference Optimization (DPO) for Grounding
+- [ ] Construct chosen vs rejected response pairs focusing on factual grounding.
+- [ ] Train DPO policy models to penalize hallucinations and reward source citation.
+- [ ] Verify attribution compliance against retrieved context.
+
+---
+
+### Track 6: Agentic Retrieval, MCP & Tool-Augmented Systems
+#### Module 15: Model Context Protocol (MCP) & Tool-Augmented LLMs
+- [ ] Understand the Model Context Protocol (MCP) architecture (Clients, Servers, Resources, Tools).
+- [ ] Build a custom MCP server exposing search, file retrieval, and database tools.
+- [ ] Integrate MCP tools into LLM function calling workflows.
+
+#### Module 16: Agentic RAG & Autonomous Search (ReAct)
+- [ ] Implement ReAct (Reason + Act) dynamic retrieval loops.
+- [ ] Enable self-directed query refinement, pagination, and multi-step investigation.
+- [ ] Add execution bounds and loop termination guardrails.
+
+#### Module 17: Multi-Agent Collaborative Retrieval
+- [ ] Build Planner-Retriever-Critic-Synthesizer multi-agent team.
+- [ ] Implement debate and consensus protocols for ambiguous retrieval tasks.
+- [ ] Parallelize distributed knowledge retrieval across specialized agents.
+
+---
+
+### Track 7: Evaluation, Observability & Production Guardrails
+#### Module 18: Retrieval Evaluation & Benchmarking (Ragas / TruLens)
+- [ ] Measure RAG Triad: Context Relevance, Groundedness (Faithfulness), and Answer Relevance.
+- [ ] Compute classical ranking metrics: MRR, NDCG@K, Precision@K, Recall@K.
+- [ ] Automate continuous evaluation pipelines with synthetic test set generation.
+
+#### Module 19: Security, Guardrails & Hallucination Mitigation
+- [ ] Defend against Indirect Prompt Injection through retrieved documents.
+- [ ] Implement PII detection and contextual data masking.
+- [ ] Add strict schema validation, confidence scoring, and fallback handoffs.
