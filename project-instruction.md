@@ -62,10 +62,15 @@ These scripts serve two key purposes:
   ```
 - Never make requests to external cloud endpoints.
 
-### 2.6 Comprehensive Complete System Demos for Every Section
-- Every tutorial section must provide a fully working, self-contained implementation from first principles rather than partial stubs or placeholders.
-- Every section must include a dedicated, rich, and exhaustive code execution demonstration that exercises virtually every feature, method, parameter, intermediate data structure, calculation step, and edge case of the implemented system.
-- Output from demonstrations must be structured, clear, and informative, showing real inputs, intermediate algorithmic states, and final evaluation results.
+### 2.6 Use Pre-Built Packages & Industry-Standard Approaches (Do Not Reinvent the Wheel)
+- **Leverage Standard Libraries:** Use pre-built, production-grade packages and industry-standard approaches whenever available. Do not reinvent the wheel or write verbose low-level boilerplate if a commonly used library already exists with pre-defined functions and optimized functionalities.
+- **Idiomatic APIs:** Prefer idiomatic, battle-tested APIs from standard ecosystems (e.g., standard vector stores, tokenizers, chunkers, graph libraries, evaluation frameworks).
+- **Common Corpora & Realistic Data Sources:** Always utilize realistic, domain-representative corpora and standard benchmark data sources rather than trivial toy snippets, demonstrating real-world retrieval engineering workflows.
+
+### 2.7 Comprehensive Complete System Demos for Every Section
+- Every tutorial section must provide a fully working, complete end-to-end system utilizing industry-standard packages and robust architectures rather than partial stubs or placeholders.
+- Every section must include a dedicated, rich, and exhaustive code execution demonstration that exercises virtually every feature, method, parameter, pipeline stage, and realistic edge case of the system.
+- Output from demonstrations must be structured, clear, and informative, showing real inputs, intermediate pipeline states, and final evaluation results.
 
 ---
 
@@ -78,14 +83,14 @@ These scripts serve two key purposes:
 - [x] Establish foundational benchmarking harness.
 
 #### Module 02: Dense vs Sparse Retrieval & Hybrid Search
-- [ ] Implement Sparse Search (BM25 / TF-IDF) with inverted indexes.
-- [ ] Implement Dense Semantic Search with embedding models.
-- [ ] Fuse sparse and dense scores using Reciprocal Rank Fusion (RRF) and convex combination.
+- [x] Implement Sparse Search (BM25 / TF-IDF) with inverted indexes.
+- [x] Implement Dense Semantic Search with embedding models.
+- [x] Fuse sparse and dense scores using Reciprocal Rank Fusion (RRF) and convex combination.
 
 #### Module 03: Vector Databases & Indexing Strategies
-- [ ] Analyze vector indexing algorithms: Exact KNN vs Flat, IVF, HNSW, and PQ.
-- [ ] Implement and evaluate vector stores (Chroma, FAISS, Qdrant).
-- [ ] Benchmark recall vs search latency tradeoffs.
+- [x] Analyze vector indexing algorithms: Exact KNN vs Flat, IVF, HNSW, and PQ.
+- [x] Implement and evaluate vector stores (Chroma, FAISS, Qdrant).
+- [x] Benchmark recall vs search latency tradeoffs.
 
 ---
 
