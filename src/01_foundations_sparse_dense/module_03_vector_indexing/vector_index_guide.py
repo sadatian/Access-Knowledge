@@ -50,6 +50,21 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
+def detect_compute_device() -> str:
+    """Detect available compute accelerator (GPU/CUDA/MPS) with graceful CPU fallback."""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return f"cuda:0 ({torch.cuda.get_device_name(0)})"
+        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            return "mps (Apple Silicon GPU)"
+    except ImportError:
+        pass
+    return "cpu (Optimized NumPy BLAS/SIMD)"
+
+COMPUTE_DEVICE = detect_compute_device()
+print(f"[INFO] Vector Indexing Compute Hardware initialized: {COMPUTE_DEVICE}")
+
 # %% [markdown]
 # ## Section 1: Exact Flat KNN Search (Ground Truth Baseline Engine)
 #

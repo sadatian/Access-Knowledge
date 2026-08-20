@@ -66,6 +66,7 @@ These scripts serve two key purposes:
 - **Leverage Standard Libraries:** Use pre-built, production-grade packages and industry-standard approaches whenever available. Do not reinvent the wheel or write verbose low-level boilerplate if a commonly used library already exists with pre-defined functions and optimized functionalities.
 - **Idiomatic APIs:** Prefer idiomatic, battle-tested APIs from standard ecosystems (e.g., standard vector stores, tokenizers, chunkers, graph libraries, evaluation frameworks).
 - **Common Corpora & Realistic Data Sources:** Always utilize realistic, domain-representative corpora and standard benchmark data sources rather than trivial toy snippets, demonstrating real-world retrieval engineering workflows.
+- **GPU Acceleration First:** ALWAYS use GPU acceleration whenever possible (e.g., CUDA / ROCm / MPS / GPU tensor operations / GPU-accelerated vector indexes and embeddings). Ensure code auto-detects GPU availability and defaults to GPU execution with graceful CPU fallback.
 
 ### 2.7 Comprehensive Complete System Demos for Every Section
 - Every tutorial section must provide a fully working, complete end-to-end system utilizing industry-standard packages and robust architectures rather than partial stubs or placeholders.
