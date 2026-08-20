@@ -12,6 +12,7 @@ venv/
 .pytest_cache/
 .coverage
 htmlcov/
+.scratch/
 
 # Documentation build outputs & cache
 site/

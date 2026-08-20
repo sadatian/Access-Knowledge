@@ -97,24 +97,24 @@ These scripts serve two key purposes:
 
 ### Track 2: Retrieval-Augmented Generation (RAG) Architecture
 #### Module 04: Advanced Chunking & Ingestion Strategies
-- [ ] Compare fixed-size, sentence-level, recursive character, and semantic chunking.
-- [ ] Implement hierarchical and parent-child document chunking.
-- [ ] Handle multi-format ingestion (Markdown, PDF, Code, Tables).
+- [x] Compare fixed-size, sentence-level, recursive character, and semantic chunking.
+- [x] Implement hierarchical and parent-child document chunking.
+- [x] Handle multi-format ingestion (Markdown, PDF, Code, Tables).
 
 #### Module 05: Query Transformation & Multi-Query Routing
-- [ ] Implement Query Rewriting, Expansion, and Step-Back Prompting.
-- [ ] Build Hypothetical Document Embeddings (HyDE) generation and retrieval.
-- [ ] Construct semantic routing between specialized vector collections.
+- [x] Implement Query Rewriting, Expansion, and Step-Back Prompting.
+- [x] Build Hypothetical Document Embeddings (HyDE) generation and retrieval.
+- [x] Construct semantic routing between specialized vector collections.
 
 #### Module 06: Context Reranking & Compression
-- [ ] Apply Cross-Encoder rerankers (e.g., BGE-Reranker, Cohere-style) to top-$K$ candidates.
-- [ ] Implement Contextual Compression & LLMLingua prompt token pruning.
-- [ ] Resolve the "Lost in the Middle" attention degradation phenomenon.
+- [x] Apply Cross-Encoder rerankers (e.g., BGE-Reranker, Cohere-style) to top-$K$ candidates.
+- [x] Implement Contextual Compression & LLMLingua prompt token pruning.
+- [x] Resolve the "Lost in the Middle" attention degradation phenomenon.
 
 #### Module 07: Modular, Corrective (CRAG) & Self-RAG
-- [ ] Build Corrective RAG (CRAG) with retrieval evaluator & web-search fallback.
-- [ ] Construct Self-RAG reflection tokens (`[Retrieve]`, `[IsRel]`, `[IsSup]`, `[IsUse]`).
-- [ ] Design Adaptive RAG routing based on query complexity.
+- [x] Build Corrective RAG (CRAG) with retrieval evaluator & web-search fallback.
+- [x] Construct Self-RAG reflection tokens (`[Retrieve]`, `[IsRel]`, `[IsSup]`, `[IsUse]`).
+- [x] Design Adaptive RAG routing based on query complexity.
 
 ---
 

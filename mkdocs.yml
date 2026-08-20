@@ -28,7 +28,7 @@ plugins:
   - search
   - mkdocs-jupyter:
       include_source: true
-      execute: false
+      execute: true
       include: ["src/**/**/*.py", "src/**/*.py", "src/*.py"]
 
 markdown_extensions:
