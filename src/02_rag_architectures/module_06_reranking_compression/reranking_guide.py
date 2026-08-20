@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🎯 Module 06: Context Reranking & Compression
+# # Module 06: Context Reranking & Compression
 #
 # Bi-encoder vector search is extremely fast but computes embeddings independently for query and document.
 # Cross-Encoders evaluate full cross-attention between query and document tokens, achieving vastly superior relevance scores at the cost of higher latency.
@@ -12,10 +12,10 @@
 # ---
 
 # %%
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 # %% [markdown]
-# ## 🔄 Section 1: Two-Stage Reranking Pipeline
+# ## Section 1: Two-Stage Reranking Pipeline
 
 # %%
 candidates = [
@@ -47,7 +47,7 @@ for rank, d in enumerate(reranked_docs, 1):
     print(f"  [{rank}] {d['id']} (Bi-Score: {d['bi_score']:.2f} -> Cross-Score: {d['cross_score']:.2f}): {d['text']}")
 
 # %% [markdown]
-# ## 🧩 Section 2: Mitigating "Lost in the Middle"
+# ## Section 2: Mitigating "Lost in the Middle"
 #
 # LLM attention heads tend to focus strongly on the start and end of context prompts, degrading attention in the middle.
 # Reordering top documents to place the most relevant items at the extreme edges improves generation fidelity:

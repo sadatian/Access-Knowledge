@@ -3,7 +3,7 @@
 Whenever you are asked to make changes, debug, or write new tutorials in this workspace, you MUST adhere to the following rules:
 
 ## 1. Review Project Instructions First
-- Before performing any code edits or file creation, you MUST read and review the [project-instruction.md](file:///home/t/MLOps/.scratch/Knowledge/project-instruction.md) file.
+- Before performing any code edits or file creation, you MUST read and review the [project-instruction.md](file:///home/t/Access%20Knowledge/project-instruction.md) file.
 - This file acts as the repository blueprint, containing structural roadmaps, todo lists, and styling standards. Do not deviate from the guidelines defined there.
 
 ## 2. Interactive Python Scripts (`# %%` Jupytext Percent Format)
@@ -12,7 +12,18 @@ Whenever you are asked to make changes, debug, or write new tutorials in this wo
 - Code sections use `# %%`.
 - This enables cell-by-cell interactive IDE execution and clean rendering via `mkdocs-jupyter`.
 
-## 3. Local LLM Routing
+## 3. Presenter Code & Auto-Collapsing (`# collapse_input`)
+- When a code cell serves purely as "presenter" code (e.g., figure/plot setup, visualization rendering, ASCII tables, or verbose print formatting routines that lack substantial algorithmic calculations), add `# collapse_input` at the top of the code cell:
+  ```python
+  # %%
+  # collapse_input
+  import matplotlib.pyplot as plt
+  # plotting / display logic...
+  ```
+- This triggers `docs/js/code_toggle.js` to auto-collapse the input block on page load in `mkdocs-jupyter`, displaying the resulting visualization/output cleanly while allowing readers to click `In [ ]` to expand the source code on demand.
+- Keep core algorithmic logic, math calculations, and fundamental data structures in standard uncollapsed cells.
+
+## 4. Local LLM Routing
 - All LLM interactions must utilize the standard OpenAI library pointed to `http://localhost:5055/v1` with a dummy API key:
   ```python
   from openai import OpenAI
@@ -20,8 +31,19 @@ Whenever you are asked to make changes, debug, or write new tutorials in this wo
   ```
 - Do not make calls to external cloud API endpoints.
 
-## 4. Token-Efficiency & Resource Controls
+## 5. Professional Typography & Emoji Restraint
+- Restrict emoji usage to top-level hierarchies only (e.g., Main Title / Hero H1 and top-level Track headers).
+- Eliminate emojis from lower hierarchies: subheadings (H2, H3, H4, H5), leaf module titles in `mkdocs.yml`, inline text, function/class docstrings, and terminal logs.
+- Use clean text tags (e.g., `[INFO]`, `[OK]`, `[ERROR]`, or simple bullets `•`) for logging instead of scattered emojis.
+
+## 6. Token-Efficiency & Resource Controls
 - **NO Automatic Docs Build:** Do NOT run `mkdocs build` or `mkdocs serve` automatically unless explicitly requested by the user.
 - **Python Execution:** Verify code correctness directly using Python via `uv run python path/to/script.py`.
 - **Targeted Reading:** When inspecting existing files, use specific ranges (`StartLine` / `EndLine`) in file-viewing tools.
 - **Concise Reporting:** Keep responses concise and focused on high-level outcomes and diffs.
+
+## 7. Comprehensive Complete System Demos for Every Section
+- **Complete, Working Systems:** Every tutorial section must provide a fully working, self-contained implementation from first principles rather than partial stubs or placeholders.
+- **Exhaustive Demos:** Every section must include a dedicated, rich, and exhaustive code execution demonstration that exercises virtually every feature, method, parameter, intermediate data structure, calculation step, and edge case of the implemented system.
+- **Structured Explanatory Output:** Output from demonstrations must be clear, structured, and informative, showing real inputs, intermediate algorithmic states, and final evaluation results.
+

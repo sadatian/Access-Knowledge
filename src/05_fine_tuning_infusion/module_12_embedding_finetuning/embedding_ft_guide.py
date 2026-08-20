@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🧪 Module 12: Embedding Model Fine-Tuning (MNRL)
+# # Module 12: Embedding Model Fine-Tuning (MNRL)
 #
 # Off-the-shelf embedding models (like BGE or MiniLM) perform well on general web text, but underperform on domain-specific corpora with specialized acronyms, medical terms, or internal codebases.
 #
@@ -15,7 +15,7 @@ import numpy as np
 from typing import List, Dict, Tuple
 
 # %% [markdown]
-# ## 🎯 Section 1: Contrastive Triplet Generation
+# ## Section 1: Contrastive Triplet Generation
 
 # %%
 training_triplets = [
@@ -39,7 +39,7 @@ for i, t in enumerate(training_triplets, 1):
     print(f"  • Negative (-):  {t['hard_negative']}")
 
 # %% [markdown]
-# ## 📉 Section 2: Multiple Negatives Ranking Loss (MNRL)
+# ## Section 2: Multiple Negatives Ranking Loss (MNRL)
 #
 # MNRL treats all other positive documents in the mini-batch as in-batch negative examples, enabling efficient training without explicitly mining billions of hard negatives.
 

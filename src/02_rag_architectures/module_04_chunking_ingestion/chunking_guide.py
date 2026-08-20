@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 📄 Module 04: Advanced Chunking & Hierarchical Ingestion
+# # Module 04: Advanced Chunking & Hierarchical Ingestion
 #
 # Chunking is the foundational step of any RAG pipeline. How you slice source documents dictates the boundary of semantic units, context preservation, and retriever accuracy.
 #
@@ -14,7 +14,7 @@
 from typing import List, Dict
 
 # %% [markdown]
-# ## ✂️ Section 1: Fixed-Size Chunking with Sliding Window Overlap
+# ## Section 1: Fixed-Size Chunking with Sliding Window Overlap
 
 # %%
 def fixed_chunk_text(text: str, chunk_size: int = 100, overlap: int = 20) -> List[str]:
@@ -41,7 +41,7 @@ for i, c in enumerate(chunks, 1):
     print(f"  Chunk {i}: '{c}'")
 
 # %% [markdown]
-# ## 🌳 Section 2: Parent-Child / Hierarchical Chunking
+# ## Section 2: Parent-Child / Hierarchical Chunking
 #
 # **Parent-Child Strategy:**
 # - Small child chunks (e.g., 100 tokens) are indexed in the vector database for high-precision retrieval matching.

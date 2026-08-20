@@ -1,5 +1,5 @@
 # %% [markdown]
-# # ⚖️ Module 14: DPO & Preference Alignment for Grounding
+# # Module 14: DPO & Preference Alignment for Grounding
 #
 # Even with retrieved documents placed in prompt context, standard LLMs sometimes hallucinate facts or ignore retrieved passages.
 #
@@ -13,7 +13,7 @@
 from typing import Dict, Any, List
 
 # %% [markdown]
-# ## 🎯 Section 1: Grounding Preference Pairs
+# ## Section 1: Grounding Preference Pairs
 
 # %%
 grounding_pairs = [
@@ -34,7 +34,7 @@ for idx, pair in enumerate(grounding_pairs, 1):
     print(f"  [Rejected] {pair['rejected']}")
 
 # %% [markdown]
-# ## 📉 Section 2: DPO Mathematical Objective
+# ## Section 2: DPO Mathematical Objective
 #
 # DPO optimizes the log-likelihood ratio between policy model $\pi_\theta$ and frozen reference model $\pi_{\text{ref}}$:
 #

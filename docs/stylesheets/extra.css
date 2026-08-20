@@ -651,6 +651,37 @@ p:has(> .doc-section-title):has(+ details.example) {
   color: #7c7c82;
 }
 
+/* Interactive Code Cell Collapse */
+.jp-Cell.jp-CodeCell .jp-InputPrompt {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.jp-Cell.jp-CodeCell .jp-InputPrompt:hover {
+  color: var(--md-accent-fg-color, #7c3aed);
+  font-weight: 600;
+}
+
+.jp-Cell.jp-CodeCell.is-collapsed .jp-InputArea-editor,
+.jp-Cell.jp-CodeCell.is-collapsed .jp-InputArea {
+  display: none !important;
+}
+
+.jp-Cell.jp-CodeCell.is-collapsed {
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}
+
+.jp-Cell.jp-CodeCell.is-collapsed .jp-InputPrompt::after {
+  content: " ▾ [code collapsed]";
+  font-size: 0.72rem;
+  opacity: 0.75;
+  font-style: italic;
+  margin-left: 0.25rem;
+}
+
 /* General Typeset overrides */
 .md-typeset a {
   color: var(--md-primary-fg-color);

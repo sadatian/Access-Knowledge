@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 📊 Module 18: Retrieval Evaluation & Benchmarking (Ragas)
+# # Module 18: Retrieval Evaluation & Benchmarking (Ragas)
 #
 # How do you measure whether your retrieval pipeline is actually improving or degrading?
 #
@@ -19,7 +19,7 @@ import numpy as np
 from typing import List, Dict, Any
 
 # %% [markdown]
-# ## 📐 Section 1: Computing Classical Ranking Metrics (MRR & NDCG)
+# ## Section 1: Computing Classical Ranking Metrics (MRR & NDCG)
 
 # %%
 def compute_mrr(rank_positions: List[int]) -> float:
@@ -46,7 +46,7 @@ print(f"  • Mean Reciprocal Rank (MRR): {mrr_val:.4f}")
 print(f"  • NDCG@3 Score:              {ndcg_val:.4f}")
 
 # %% [markdown]
-# ## 🔺 Section 2: Simulating RAG Triad Evaluation
+# ## Section 2: Simulating RAG Triad Evaluation
 
 # %%
 rag_triad_scores = {
@@ -57,5 +57,5 @@ rag_triad_scores = {
 
 print("\nRAG Triad Scores:")
 for metric, score in rag_triad_scores.items():
-    status = "✅ PASS" if score >= 0.85 else "❌ FAIL"
+    status = "PASS" if score >= 0.85 else "FAIL"
     print(f"  • {metric:<30}: {score:.2f} [{status}]")

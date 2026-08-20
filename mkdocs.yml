@@ -62,37 +62,38 @@ extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
   - https://unpkg.com/mermaid@10/dist/mermaid.min.js
   - js/mermaid_zoom.js
+  - js/code_toggle.js
 
 extra_css:
   - stylesheets/extra.css
 
 nav:
-  - "🏠 <b>Home</b>": index.md
-  - "📖 Introduction to Knowledge Retrieval": src/intro.py
-  - "🛠️ Unified Knowledge CLI Tutorial": src/knowledge/cli.py
+  - "Home": index.md
+  - "Introduction to Knowledge Retrieval": src/intro.py
+  - "Unified Knowledge CLI Tutorial": src/knowledge/cli.py
   - "Track 1: Foundations & Hybrid Retrieval":
-    - "⚙️ Workspace Setup & Tokenization Math": src/01_foundations_sparse_dense/module_01_environment_setup/env_guide.py
-    - "🔍 Sparse vs Dense Search & Hybrid Fusion": src/01_foundations_sparse_dense/module_02_sparse_dense_hybrid/hybrid_search_guide.py
-    - "⚡ Vector Indexing & Algorithms (HNSW / IVF)": src/01_foundations_sparse_dense/module_03_vector_indexing/vector_index_guide.py
+    - "Workspace Setup & Tokenization Math": src/01_foundations_sparse_dense/module_01_environment_setup/env_guide.py
+    - "Sparse vs Dense Search & Hybrid Fusion": src/01_foundations_sparse_dense/module_02_sparse_dense_hybrid/hybrid_search_guide.py
+    - "Vector Indexing & Algorithms (HNSW / IVF)": src/01_foundations_sparse_dense/module_03_vector_indexing/vector_index_guide.py
   - "Track 2: RAG Architectures":
-    - "📄 Advanced Chunking & Hierarchical Ingestion": src/02_rag_architectures/module_04_chunking_ingestion/chunking_guide.py
-    - "🔀 Query Transformation & HyDE": src/02_rag_architectures/module_05_query_transformation/query_transform_guide.py
-    - "🎯 Context Reranking & Compression": src/02_rag_architectures/module_06_reranking_compression/reranking_guide.py
-    - "🔄 Modular, Corrective (CRAG) & Self-RAG": src/02_rag_architectures/module_07_advanced_modular_rag/modular_rag_guide.py
+    - "Advanced Chunking & Hierarchical Ingestion": src/02_rag_architectures/module_04_chunking_ingestion/chunking_guide.py
+    - "Query Transformation & HyDE": src/02_rag_architectures/module_05_query_transformation/query_transform_guide.py
+    - "Context Reranking & Compression": src/02_rag_architectures/module_06_reranking_compression/reranking_guide.py
+    - "Modular, Corrective (CRAG) & Self-RAG": src/02_rag_architectures/module_07_advanced_modular_rag/modular_rag_guide.py
   - "Track 3: Cache-Augmented Generation (CAG)":
-    - "⚡ Cache-Augmented Generation (CAG) Patterns": src/03_cag_long_context/module_08_cache_augmented_generation/cag_guide.py
-    - "📏 Long-Context LLMs vs RAG Tradeoff Analysis": src/03_cag_long_context/module_09_long_context_vs_rag/long_context_guide.py
+    - "Cache-Augmented Generation (CAG) Patterns": src/03_cag_long_context/module_08_cache_augmented_generation/cag_guide.py
+    - "Long-Context LLMs vs RAG Tradeoff Analysis": src/03_cag_long_context/module_09_long_context_vs_rag/long_context_guide.py
   - "Track 4: Knowledge-Augmented Generation (KAG)":
-    - "🕸️ Knowledge Graphs & Triplet Extraction": src/04_kag_graph_rag/module_10_knowledge_graphs/knowledge_graph_guide.py
-    - "🌐 GraphRAG & Community Knowledge Fusion": src/04_kag_graph_rag/module_11_graph_rag/graph_rag_guide.py
+    - "Knowledge Graphs & Triplet Extraction": src/04_kag_graph_rag/module_10_knowledge_graphs/knowledge_graph_guide.py
+    - "GraphRAG & Community Knowledge Fusion": src/04_kag_graph_rag/module_11_graph_rag/graph_rag_guide.py
   - "Track 5: Fine-Tuning for Knowledge Infusion":
-    - "🧪 Embedding Model Fine-Tuning (MNRL)": src/05_fine_tuning_infusion/module_12_embedding_finetuning/embedding_ft_guide.py
-    - "🎛️ PEFT / LoRA / QLoRA for Knowledge Infusion": src/05_fine_tuning_infusion/module_13_peft_lora_knowledge/lora_knowledge_guide.py
-    - "⚖️ DPO & Preference Alignment for Grounding": src/05_fine_tuning_infusion/module_14_dpo_grounding/dpo_grounding_guide.py
+    - "Embedding Model Fine-Tuning (MNRL)": src/05_fine_tuning_infusion/module_12_embedding_finetuning/embedding_ft_guide.py
+    - "PEFT / LoRA / QLoRA for Knowledge Infusion": src/05_fine_tuning_infusion/module_13_peft_lora_knowledge/lora_knowledge_guide.py
+    - "DPO & Preference Alignment for Grounding": src/05_fine_tuning_infusion/module_14_dpo_grounding/dpo_grounding_guide.py
   - "Track 6: Agentic Retrieval & MCP":
-    - "🔌 Model Context Protocol (MCP) & Tool Retrieval": src/06_agentic_retrieval_mcp/module_15_mcp_tool_retrieval/mcp_tools_guide.py
-    - "🤖 Agentic RAG & Autonomous Search (ReAct)": src/06_agentic_retrieval_mcp/module_16_agentic_rag_react/agentic_rag_guide.py
-    - "👥 Multi-Agent Collaborative Retrieval": src/06_agentic_retrieval_mcp/module_17_multi_agent_retrieval/multi_agent_retrieval_guide.py
+    - "Model Context Protocol (MCP) & Tool Retrieval": src/06_agentic_retrieval_mcp/module_15_mcp_tool_retrieval/mcp_tools_guide.py
+    - "Agentic RAG & Autonomous Search (ReAct)": src/06_agentic_retrieval_mcp/module_16_agentic_rag_react/agentic_rag_guide.py
+    - "Multi-Agent Collaborative Retrieval": src/06_agentic_retrieval_mcp/module_17_multi_agent_retrieval/multi_agent_retrieval_guide.py
   - "Track 7: Evaluation & Production Guardrails":
-    - "📊 Retrieval Evaluation & Benchmarking (Ragas)": src/07_eval_observability_guardrails/module_18_rag_evaluation_benchmarks/rag_eval_guide.py
-    - "🛡️ Security, Injection Defenses & Guardrails": src/07_eval_observability_guardrails/module_19_security_guardrails/guardrails_guide.py
+    - "Retrieval Evaluation & Benchmarking (Ragas)": src/07_eval_observability_guardrails/module_18_rag_evaluation_benchmarks/rag_eval_guide.py
+    - "Security, Injection Defenses & Guardrails": src/07_eval_observability_guardrails/module_19_security_guardrails/guardrails_guide.py"

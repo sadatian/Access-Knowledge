@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 📖 Introduction to Knowledge Retrieval A-Z
+# # Introduction to Knowledge Retrieval A-Z
 #
 # Welcome to the **Knowledge Retrieval A-Z Masterclass**!
 #
@@ -8,7 +8,7 @@
 #
 # ---
 #
-# ## 🗺️ The Modern Knowledge Retrieval Spectrum
+# ## The Modern Knowledge Retrieval Spectrum
 #
 # ```mermaid
 # graph LR
@@ -30,7 +30,7 @@ import sys
 from openai import OpenAI
 
 # %% [markdown]
-# ## ⚡ Connecting to the Local LLM Endpoint
+# ## Connecting to the Local LLM Endpoint
 #
 # In this environment, all LLM operations route to a local server running at `http://localhost:5055/v1`.
 # We instantiate the standard OpenAI client pointing to this local address:
@@ -41,10 +41,10 @@ client = OpenAI(
     api_key="dummy"
 )
 
-print(f"✅ Local LLM Client initialized targeting: {client.base_url}")
+print(f"[OK] Local LLM Client initialized targeting: {client.base_url}")
 
 # %% [markdown]
-# ## 📊 Comparing Knowledge Augmentation Paradigms
+# ## Comparing Knowledge Augmentation Paradigms
 #
 # | Architecture | Best For | Latency Profile | Accuracy & Grounding | Compute Overhead |
 # | :--- | :--- | :--- | :--- | :--- |
@@ -57,6 +57,7 @@ print(f"✅ Local LLM Client initialized targeting: {client.base_url}")
 # | **Agentic RAG / MCP** | Autonomous research & multi-source tasks | Variable (Multi-turn) | Maximum flexibility | High token usage |
 
 # %%
+# collapse_input
 def summarize_curriculum():
     tracks = [
         "Track 1: Foundations & Classical Retrieval (BM25, Dense, HNSW)",
@@ -67,7 +68,7 @@ def summarize_curriculum():
         "Track 6: Agentic Retrieval & MCP (Model Context Protocol)",
         "Track 7: Evaluation & Production Guardrails (Ragas & Injection Defenses)"
     ]
-    print("🚀 Knowledge Retrieval A-Z Curriculum Ready:")
+    print("Knowledge Retrieval A-Z Curriculum Ready:")
     for idx, track in enumerate(tracks, 1):
         print(f"  {idx}. {track}")
 

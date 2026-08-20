@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🌐 Module 11: GraphRAG & Community Knowledge Fusion
+# # Module 11: GraphRAG & Community Knowledge Fusion
 #
 # Standard vector RAG struggles to answer holistic, corpus-wide questions like *"What are the overarching themes in this entire dataset?"* because vector search only retrieves specific localized text chunks.
 #
@@ -15,7 +15,7 @@
 from typing import Dict, List, Any
 
 # %% [markdown]
-# ## 🏙️ Section 1: Hierarchical Community Clusters
+# ## Section 1: Hierarchical Community Clusters
 
 # %%
 communities = {
@@ -33,12 +33,12 @@ communities = {
 
 print("Hierarchical Knowledge Communities:")
 for cid, info in communities.items():
-    print(f"\n🏷️ {cid.upper()}: {info['title']}")
+    print(f"\n[{cid.upper()}]: {info['title']}")
     print(f"   Entities: {', '.join(info['entities'])}")
     print(f"   Summary: {info['summary']}")
 
 # %% [markdown]
-# ## 🌐 Section 2: Global Search vs Local Search Routing
+# ## Section 2: Global Search vs Local Search Routing
 
 # %%
 def route_graphrag_query(query: str) -> str:

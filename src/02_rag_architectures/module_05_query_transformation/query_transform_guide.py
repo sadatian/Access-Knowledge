@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🔀 Module 05: Query Transformation & HyDE
+# # Module 05: Query Transformation & HyDE
 #
 # Raw user queries are frequently ambiguous, brief, or poorly aligned with the phrasing found inside indexed documents.
 #
@@ -14,7 +14,7 @@
 from typing import List
 
 # %% [markdown]
-# ## 💡 Section 1: Multi-Query Rewriting & Expansion
+# ## Section 1: Multi-Query Rewriting & Expansion
 
 # %%
 def expand_query(raw_query: str) -> List[str]:
@@ -35,7 +35,7 @@ for q in expanded:
     print(f"  • {q}")
 
 # %% [markdown]
-# ## 🔮 Section 2: Hypothetical Document Embeddings (HyDE)
+# ## Section 2: Hypothetical Document Embeddings (HyDE)
 #
 # HyDE generates a synthetic hypothetical answer using an LLM. 
 # Even if the hypothetical answer contains minor hallucinations, its embedding vector resides in "document space" rather than "query space", significantly improving semantic similarity matches.

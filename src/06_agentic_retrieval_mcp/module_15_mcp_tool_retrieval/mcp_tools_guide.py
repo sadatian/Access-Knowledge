@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🔌 Module 15: Model Context Protocol (MCP) & Tool Retrieval
+# # Module 15: Model Context Protocol (MCP) & Tool Retrieval
 #
 # The **Model Context Protocol (MCP)** is an open standard developed by Anthropic that standardizes how AI applications connect to external tools, databases, and context servers.
 #
@@ -14,7 +14,7 @@ import json
 from typing import Dict, Any, List
 
 # %% [markdown]
-# ## 🛠️ Section 1: Exposing Knowledge Retrieval via MCP Tools
+# ## Section 1: Exposing Knowledge Retrieval via MCP Tools
 
 # %%
 mcp_tool_definitions = [
@@ -47,7 +47,7 @@ print("Declared MCP Server Tools:")
 print(json.dumps(mcp_tool_definitions, indent=2))
 
 # %% [markdown]
-# ## ⚡ Section 2: Simulating MCP JSON-RPC Request/Response
+# ## Section 2: Simulating MCP JSON-RPC Request/Response
 
 # %%
 def handle_mcp_tool_call(tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:

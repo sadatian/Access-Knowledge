@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🔄 Module 07: Modular, Corrective (CRAG) & Self-RAG
+# # Module 07: Modular, Corrective (CRAG) & Self-RAG
 #
 # Standard naive RAG follows a rigid single-shot path: *Retrieve -> Prompt -> Generate*.
 #
@@ -14,7 +14,7 @@
 from typing import Dict, Any, List
 
 # %% [markdown]
-# ## 🛡️ Section 1: Corrective RAG (CRAG) Decision Flow
+# ## Section 1: Corrective RAG (CRAG) Decision Flow
 
 # %%
 def crag_evaluator(query: str, retrieved_docs: List[str]) -> str:
@@ -41,7 +41,7 @@ run_crag_pipeline("Explain CAG architectures", ["Cache-Augmented Generation prel
 run_crag_pipeline("Explain CAG architectures", ["Completely unrelated recipe for baking bread."])
 
 # %% [markdown]
-# ## 🪞 Section 2: Self-RAG Reflection Tokens
+# ## Section 2: Self-RAG Reflection Tokens
 #
 # Self-RAG models output special control tokens:
 # - `[Retrieve=True]` / `[Retrieve=False]`

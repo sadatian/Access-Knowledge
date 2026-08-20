@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🎛️ Module 13: PEFT / LoRA / QLoRA for Knowledge Infusion
+# # Module 13: PEFT / LoRA / QLoRA for Knowledge Infusion
 #
 # Can we teach an LLM new facts purely through weights rather than runtime context injection?
 #
@@ -16,7 +16,7 @@ import numpy as np
 from typing import Dict, Any
 
 # %% [markdown]
-# ## 🧮 Section 1: LoRA Parameter Math & Memory Savings
+# ## Section 1: LoRA Parameter Math & Memory Savings
 
 # %%
 def compute_lora_parameter_footprint(d: int = 4096, k: int = 4096, r: int = 16) -> Dict[str, Any]:
@@ -36,7 +36,7 @@ print(f"  • LoRA Rank-16 Matrices:     {stats['lora_weights']:,} parameters")
 print(f"  • Parameter Reduction:       {stats['reduction']} memory saved!")
 
 # %% [markdown]
-# ## 📝 Section 2: Knowledge Infusion Instruction Datasets
+# ## Section 2: Knowledge Infusion Instruction Datasets
 
 # %%
 instruction_sample = {

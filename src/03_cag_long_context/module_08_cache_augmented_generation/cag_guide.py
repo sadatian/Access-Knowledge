@@ -1,5 +1,5 @@
 # %% [markdown]
-# # ⚡ Module 08: Cache-Augmented Generation (CAG) Patterns
+# # Module 08: Cache-Augmented Generation (CAG) Patterns
 #
 # **Cache-Augmented Generation (CAG)** represents a major paradigm shift for fixed or slowly changing enterprise knowledge bases.
 #
@@ -17,7 +17,7 @@ import time
 from typing import Dict, Any
 
 # %% [markdown]
-# ## 🧠 Section 1: Understanding Transformer KV-Cache
+# ## Section 1: Understanding Transformer KV-Cache
 #
 # In transformer autoregressive decoding, computing keys and values for prior tokens is redundant.
 # KV-caching retains these tensor states in GPU memory so only new prompt and generated tokens require forward attention passes.
@@ -50,7 +50,7 @@ print(f"  • CAG TTFT Latency: {cag_cache.benchmark_latency(is_preloaded=True):
 print(f"  • Standard Prefill Latency: {cag_cache.benchmark_latency(is_preloaded=False):.2f} ms")
 
 # %% [markdown]
-# ## ⚖️ Section 2: When to Use CAG vs RAG
+# ## Section 2: When to Use CAG vs RAG
 #
 # | Criteria | Use Cache-Augmented Gen (CAG) | Use Standard RAG |
 # | :--- | :--- | :--- |

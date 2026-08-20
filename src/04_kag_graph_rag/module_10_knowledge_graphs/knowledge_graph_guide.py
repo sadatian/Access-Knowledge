@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🕸️ Module 10: Knowledge Graphs & Triplet Extraction
+# # Module 10: Knowledge Graphs & Triplet Extraction
 #
 # Vector databases search by geometric cosine similarity, but struggle with multi-hop relational questions (e.g., *"Which colleagues of Person A worked on Project X before Year Y?"*).
 #
@@ -17,7 +17,7 @@ import networkx as nx
 from typing import List, Tuple, Dict, Any
 
 # %% [markdown]
-# ## 🔍 Section 1: Entity-Relation Triplet Construction
+# ## Section 1: Entity-Relation Triplet Construction
 
 # %%
 triplets = [
@@ -39,7 +39,7 @@ print(f"  • Total Nodes (Entities): {G.number_of_nodes()}")
 print(f"  • Total Edges (Relations): {G.number_of_edges()}")
 
 # %% [markdown]
-# ## 🚀 Section 2: Multi-Hop Graph Traversal
+# ## Section 2: Multi-Hop Graph Traversal
 #
 # Finding indirect multi-hop reasoning paths (e.g., How is `CAG` linked to `GPU_VRAM`?).
 

@@ -4,7 +4,7 @@
 
 ---
 
-## 🌟 Overview & Philosophy
+## Overview & Philosophy
 
 Modern Large Language Model applications rely heavily on external context to eliminate hallucinations, inject domain-specific proprietary information, and reason over vast corpuses. However, building production-grade knowledge systems requires mastering a spectrum of architectures:
 
@@ -19,7 +19,7 @@ This repository is designed with a **Python-first, interactive notebook approach
 
 ---
 
-## 🧭 Curriculum Tracks
+## Curriculum Tracks
 
 | Track | Focus | Key Topics |
 | :--- | :--- | :--- |
@@ -33,7 +33,7 @@ This repository is designed with a **Python-first, interactive notebook approach
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ```bash
 # 1. Synchronize environment and dependencies
@@ -48,7 +48,7 @@ uv run python src/intro.py
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 .scratch/Knowledge/

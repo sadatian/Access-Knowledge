@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 🤖 Module 16: Agentic RAG & Autonomous Search (ReAct)
+# # Module 16: Agentic RAG & Autonomous Search (ReAct)
 #
 # Traditional RAG is passive and brittle: it performs one vector search and immediately forces the LLM to generate an answer.
 #
@@ -15,15 +15,16 @@
 from typing import List, Dict, Any
 
 # %% [markdown]
-# ## 🔄 Section 1: The ReAct (Thought -> Action -> Observation) Loop
+# ## Section 1: The ReAct (Thought -> Action -> Observation) Loop
 
 # %%
+# collapse_input
 class AgenticRAGRunner:
     def __init__(self, max_turns: int = 3):
         self.max_turns = max_turns
 
     def run(self, user_question: str):
-        print(f"🤖 User Question: '{user_question}'\n")
+        print(f"User Question: '{user_question}'\n")
         
         # Turn 1
         print("  [Thought 1]: I need to find the definition of CAG.")

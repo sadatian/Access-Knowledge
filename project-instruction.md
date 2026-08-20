@@ -38,7 +38,23 @@ These scripts serve two key purposes:
   print("Running Knowledge Retrieval module...")
   ```
 
-### 2.3 Local LLM API Routing
+### 2.3 Presenter Code & Auto-Collapsing (`# collapse_input`)
+- When a code cell contains purely "presenter" or visualization code (e.g., plot configurations, ASCII tables, or verbose display routines lacking substantive algorithmic calculations), insert `# collapse_input` at the top of the code block:
+  ```python
+  # %%
+  # collapse_input
+  import matplotlib.pyplot as plt
+  # Figure setup and display code...
+  ```
+- The `docs/js/code_toggle.js` script will automatically collapse the input cell on initial load in `mkdocs-jupyter` while keeping the resulting output visible. Users can toggle visibility by clicking the prompt `In [ ]`.
+- Core algorithmic implementations, mathematical operations, and data structures must remain in standard uncollapsed cells (`# %%`).
+
+### 2.4 Professional Typography & Emoji Restraint
+- Restrict emoji use to top-level hierarchies only (e.g., Main Title / Hero H1 and top-level Track headers).
+- Do not use emojis in lower-level hierarchies (H2, H3, H4, H5 subheadings, leaf navigation titles, bullet points, function docstrings, or terminal outputs).
+- Maintain an authoritative, technical, and distraction-free presentation style.
+
+### 2.5 Local LLM API Routing
 - Any LLM calls are routed directly to `http://localhost:5055/v1` using the standard OpenAI client:
   ```python
   from openai import OpenAI
@@ -46,15 +62,20 @@ These scripts serve two key purposes:
   ```
 - Never make requests to external cloud endpoints.
 
+### 2.6 Comprehensive Complete System Demos for Every Section
+- Every tutorial section must provide a fully working, self-contained implementation from first principles rather than partial stubs or placeholders.
+- Every section must include a dedicated, rich, and exhaustive code execution demonstration that exercises virtually every feature, method, parameter, intermediate data structure, calculation step, and edge case of the implemented system.
+- Output from demonstrations must be structured, clear, and informative, showing real inputs, intermediate algorithmic states, and final evaluation results.
+
 ---
 
 ## 3. Module Roadmap & Curriculum Checklist
 
 ### Track 1: Foundations & Classical Retrieval
 #### Module 01: Modern Retrieval Workspace Setup (`uv`, environment, test rigs, tokenizers)
-- [ ] Initialize Python environment and dependencies with `uv`.
-- [ ] Explore tokenizer mechanics, context windows, and embeddings math.
-- [ ] Establish foundational benchmarking harness.
+- [x] Initialize Python environment and dependencies with `uv`.
+- [x] Explore tokenizer mechanics, context windows, and embeddings math.
+- [x] Establish foundational benchmarking harness.
 
 #### Module 02: Dense vs Sparse Retrieval & Hybrid Search
 - [ ] Implement Sparse Search (BM25 / TF-IDF) with inverted indexes.

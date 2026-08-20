@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 👥 Module 17: Multi-Agent Collaborative Retrieval
+# # Module 17: Multi-Agent Collaborative Retrieval
 #
 # For complex enterprise research tasks, a single agent can become overloaded with context or miss contradictory facts.
 #
@@ -15,12 +15,13 @@
 from typing import Dict, List
 
 # %% [markdown]
-# ## 🏢 Section 1: Multi-Agent Role Orchestration
+# ## Section 1: Multi-Agent Role Orchestration
 
 # %%
+# collapse_input
 class MultiAgentRetrievalSwarm:
     def execute(self, complex_goal: str):
-        print(f"👥 Initiating Multi-Agent Retrieval for: '{complex_goal}'\n")
+        print(f"Initiating Multi-Agent Retrieval for: '{complex_goal}'\n")
         
         # Step 1: Planner
         subtasks = ["Search CAG benchmarks", "Search Vector DB scaling limits", "Compare memory overheads"]

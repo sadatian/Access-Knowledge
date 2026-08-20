@@ -1,5 +1,5 @@
 # %% [markdown]
-# # ⚡ Module 03: Vector Indexing & Algorithms (HNSW / IVF)
+# # Module 03: Vector Indexing & Algorithms (HNSW / IVF)
 #
 # When vector collections grow beyond millions of items, brute-force exact nearest neighbor search ($O(N)$) becomes too slow for real-time inference.
 #
@@ -17,7 +17,7 @@ import numpy as np
 from typing import List, Tuple
 
 # %% [markdown]
-# ## 🔢 Section 1: Exact Flat KNN Search
+# ## Section 1: Exact Flat KNN Search
 
 # %%
 def exact_knn(query_vec: np.ndarray, index_matrix: np.ndarray, top_k: int = 5) -> Tuple[np.ndarray, np.ndarray]:
@@ -45,7 +45,7 @@ print(f"Top 5 Closest Vector IDs: {indices}")
 print(f"Top 5 Cosine Scores: {scores}")
 
 # %% [markdown]
-# ## 🌐 Section 2: HNSW Conceptual Graph Architecture
+# ## Section 2: HNSW Conceptual Graph Architecture
 #
 # HNSW constructs a multi-layer graph where:
 # - **Top Layers:** Long-range skip connections across distant clusters.
@@ -54,6 +54,7 @@ print(f"Top 5 Cosine Scores: {scores}")
 # Average search complexity: $O(\log N)$.
 
 # %%
+# collapse_input
 class HNSWSimulator:
     def __init__(self, num_vectors: int, max_layers: int = 4):
         self.num_vectors = num_vectors
@@ -61,7 +62,7 @@ class HNSWSimulator:
         self.layers = {layer: int(num_vectors * (0.1 ** layer)) for layer in range(max_layers)}
 
     def describe(self):
-        print("\n🌐 HNSW Multi-Layer Hierarchy Simulation:")
+        print("\nHNSW Multi-Layer Hierarchy Simulation:")
         for layer, node_count in sorted(self.layers.items(), reverse=True):
             print(f"  Layer {layer}: {node_count:>6} nodes (Skip connections & cluster routing)")
 
