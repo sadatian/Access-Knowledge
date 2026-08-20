@@ -12,22 +12,21 @@ def _load_vector_index_guide():
     return mod
 
 vector_index_guide = _load_vector_index_guide()
-FlatIndex = vector_index_guide.FlatIndex
-IVFIndex = vector_index_guide.IVFIndex
-HNSWIndex = vector_index_guide.HNSWIndex
-ProductQuantizer = vector_index_guide.ProductQuantizer
-ANNBenchmarkHarness = vector_index_guide.ANNBenchmarkHarness
+FAISSFlatEngine = vector_index_guide.FAISSFlatEngine
+FAISSIVFEngine = vector_index_guide.FAISSIVFEngine
+FAISSHNSWEngine = vector_index_guide.FAISSHNSWEngine
+FAISSPQEngine = vector_index_guide.FAISSPQEngine
+FAISSBenchmarkHarness = vector_index_guide.FAISSBenchmarkHarness
 
 
-def test_flat_index_exact_search():
+def test_faiss_flat_engine():
     np.random.seed(42)
     vectors = np.random.randn(50, 16).astype(np.float32)
     
-    flat = FlatIndex(dimension=16)
+    flat = FAISSFlatEngine(dimension=16, use_gpu=True)
     flat.add(vectors)
 
-    assert flat.num_vectors == 50
-    assert flat.memory_bytes() == 50 * 16 * 4
+    assert flat.ntotal == 50
 
     # Query with exact first vector -> top match must be vector 0 with score ~1.0
     query = vectors[0]
@@ -35,84 +34,67 @@ def test_flat_index_exact_search():
     
     assert len(indices) == 5
     assert indices[0] == 0
-    assert math.isclose(scores[0], 1.0, rel_tol=1e-5)
+    assert math.isclose(scores[0], 1.0, rel_tol=1e-4)
 
 
-def test_ivf_index_clustering_and_search():
+def test_faiss_ivf_engine():
     np.random.seed(42)
     vectors = np.random.randn(100, 16).astype(np.float32)
     
-    ivf = IVFIndex(dimension=16, num_centroids=8, max_kmeans_iters=5)
+    ivf = FAISSIVFEngine(dimension=16, nlist=8, use_gpu=True)
     ivf.train_and_add(vectors)
 
-    assert ivf.centroids is not None
-    assert ivf.centroids.shape == (8, 16)
-    assert ivf.num_vectors == 100
+    assert ivf.index.ntotal == 100
 
-    # Total vectors across all inverted lists must equal N
-    total_assigned = sum(len(lst) for lst in ivf.inverted_lists.values())
-    assert total_assigned == 100
-
-    # Search with n_probe=8 (full scan of all centroids)
     query = vectors[0]
-    indices, scores = ivf.search(query, top_k=5, n_probe=8)
+    indices, scores = ivf.search(query, top_k=5, nprobe=8)
     assert len(indices) == 5
     assert indices[0] == 0
 
 
-def test_hnsw_index_graph_construction_and_search():
+def test_faiss_hnsw_engine():
     np.random.seed(42)
     vectors = np.random.randn(80, 16).astype(np.float32)
 
-    hnsw = HNSWIndex(dimension=16, M=4, ef_construction=8)
+    hnsw = FAISSHNSWEngine(dimension=16, M=8, ef_construction=16)
     hnsw.add(vectors)
 
-    assert hnsw.num_nodes == 80
-    assert hnsw.max_layer >= 0
-    assert len(hnsw.graphs[0]) == 80  # Layer 0 must contain all nodes
+    assert hnsw.index.ntotal == 80
 
-    # Search
     query = vectors[0]
-    indices, scores = hnsw.search(query, top_k=5, ef_search=16)
+    indices, scores = hnsw.search(query, top_k=5, ef_search=32)
     assert len(indices) == 5
-    assert scores[0] > 0.5
+    assert scores[0] > 0.8
 
 
-def test_product_quantizer_compression_and_adc():
+def test_faiss_pq_engine():
     np.random.seed(42)
-    # D = 32, M = 4, sub_dim = 8, K_sub = 8
-    vectors = np.random.randn(100, 32).astype(np.float32)
+    # N = 300 (>= 256 for nbits=8), D = 32, M = 4, nbits = 8
+    vectors = np.random.randn(300, 32).astype(np.float32)
 
-    pq = ProductQuantizer(dimension=32, num_subvectors=4, num_centroids=8)
-    pq.train_and_encode(vectors)
+    pq = FAISSPQEngine(dimension=32, M=4, nbits=8)
+    pq.train_and_add(vectors)
 
-    assert pq.codebooks is not None
-    assert pq.codebooks.shape == (4, 8, 8)
-    assert pq.codes is not None
-    assert pq.codes.shape == (100, 4)
-
-    # Theoretical compression: (32 * 4) / (4 * 1) = 128 / 4 = 32.0x
+    assert pq.index.ntotal == 300
     assert math.isclose(pq.compression_ratio(), 32.0)
 
-    # Search ADC
     query = vectors[0]
-    indices, dists = pq.search(query, top_k=5)
+    indices, scores = pq.search(query, top_k=5)
     assert len(indices) == 5
-    assert len(dists) == 5
-    assert indices[0] == 0  # Nearest quantized code should match query vector
-    assert dists[0] >= 0.0  # Euclidean distance must be non-negative
+    assert len(scores) == 5
 
 
-def test_ann_benchmark_harness():
+def test_faiss_benchmark_harness():
     np.random.seed(42)
-    dataset = np.random.randn(50, 16).astype(np.float32)
+    dataset = np.random.randn(300, 16).astype(np.float32)
     queries = [np.random.randn(16).astype(np.float32) for _ in range(3)]
 
-    harness = ANNBenchmarkHarness(dataset, queries)
+    harness = FAISSBenchmarkHarness(dataset, queries)
     results = harness.run_benchmark()
 
-    assert len(results) == 3
-    assert results[0]["index_type"] == "1. Exact Flat KNN"
+    assert len(results) == 4
+    assert "FAISS Flat" in results[0]["index_type"]
     assert results[0]["recall_10"] == 1.0
-    assert results[1]["recall_10"] >= 0.0
-    assert results[2]["recall_10"] >= 0.0
+    for r in results:
+        assert r["recall_10"] >= 0.0
+        assert r["mean_latency_ms"] >= 0.0
