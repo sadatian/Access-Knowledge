@@ -11,6 +11,11 @@
   --md-nav-item-color--active: #d81b60; /* Higher contrast active state */
 }
 
+/* Setting page zoom to 90% */
+html {
+  zoom: 90%;
+}
+
 /* Headings, Brand Titles & Top Tabs (Roboto Slab) */
 h1,
 h2,
@@ -60,6 +65,21 @@ pre {
 /* Reduce the font for all markdown text slightly */
 .md-typeset {
   font-size: 0.76rem !important;
+}
+
+/* Compact table styling: remove excessive min-width and configure horizontal cell padding */
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td,
+.md-typeset table th,
+.md-typeset table td {
+  min-width: 0 !important;
+  padding: 0.3rem !important;
+  font-size: 0.65rem !important;
+}
+
+/* Making the main content column wider */
+.md-grid {
+  max-width: 1600px !important;
 }
 
 /* Reduce the font for all code blocks in markdown considerably */
@@ -645,41 +665,53 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left-color: var(--md-accent-fg-color);
 }
 
-.jp-InputPrompt,
-.jp-OutputPrompt {
-  font-size: 0.75rem;
-  color: #7c7c82;
-}
-
-/* Interactive Code Cell Collapse */
-.jp-Cell.jp-CodeCell .jp-InputPrompt {
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
+/* ==============================================================================
+   Subtle Native Code Cell Toggle (Zero DOM Wrapping)
+   ============================================================================== */
+.jp-InputPrompt {
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: opacity 0.15s ease;
   position: relative;
 }
 
-.jp-Cell.jp-CodeCell .jp-InputPrompt:hover {
-  color: var(--md-accent-fg-color, #7c3aed);
-  font-weight: 600;
+.jp-InputPrompt:hover {
+  opacity: 0.7;
 }
 
-.jp-Cell.jp-CodeCell.is-collapsed .jp-InputArea-editor,
-.jp-Cell.jp-CodeCell.is-collapsed .jp-InputArea {
+.jp-InputPrompt::before {
+  content: "▼ ";
+  font-size: 0.55rem;
+  color: var(--md-primary-fg-color, #7d2a44);
+  margin-right: 3px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+[data-md-color-scheme="slate"] .jp-InputPrompt::before {
+  color: var(--md-accent-fg-color, #bc7085);
+}
+
+/* Collapsed state */
+.jp-Cell.jp-CodeCell.is-collapsed .jp-InputArea-editor {
   display: none !important;
+}
+
+.jp-Cell.jp-CodeCell.is-collapsed .jp-InputPrompt::before {
+  content: "▶ ";
+}
+
+.jp-Cell.jp-CodeCell.is-collapsed .jp-InputPrompt::after {
+  content: " [SHOW CODE]";
+  font-size: 0.65rem;
+  color: #888888;
+  font-style: italic;
+  font-weight: normal;
 }
 
 .jp-Cell.jp-CodeCell.is-collapsed {
   margin-bottom: 0.5rem;
-  opacity: 0.85;
-}
-
-.jp-Cell.jp-CodeCell.is-collapsed .jp-InputPrompt::after {
-  content: " ▾ [code collapsed]";
-  font-size: 0.72rem;
-  opacity: 0.75;
-  font-style: italic;
-  margin-left: 0.25rem;
+  opacity: 0.9;
 }
 
 /* General Typeset overrides */
