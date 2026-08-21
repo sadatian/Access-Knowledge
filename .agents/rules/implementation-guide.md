@@ -53,3 +53,11 @@ Whenever you are asked to make changes, debug, or write new tutorials in this wo
 - **Complete, Working Systems:** Every tutorial section must provide a fully functional, complete end-to-end system utilizing industry-standard packages and robust architectures rather than partial stubs or placeholders.
 - **Exhaustive Demos:** Every section must include a dedicated, rich, and exhaustive code execution demonstration exercising almost every feature, method, parameter, pipeline stage, and realistic edge case of the system.
 - **Structured Explanatory Output:** Output from demonstrations must be clear, structured, and informative, showing real inputs, intermediate pipeline states, and final evaluation results.
+
+## 9. Hierarchical Subsection Numbering
+- **Include Parent Section Prefix:** All subsection headings must explicitly include their parent section number.
+  - In Section 2: `### 2.1. The Byte-Pair Encoding (BPE) Algorithm`, `### 2.2. Subword Merge Hierarchy Diagram`, `### 2.3. Conceptual Bridge...`.
+  - In Section 4: `#### 4.1. Metric Geometries`, `#### 4.2. Unit-Norm Equivalence`, `#### 4.3. The Curse of Dimensionality...`.
+  - In Section 6: `### 6.1. Metric Space Selection Guide`, `### 6.2. Vector Index Architecture Comparison`.
+- **Never Use Isolated Numbers:** Do not use un-prefixed numbering (e.g. `### 1.`, `### 2.`, `#### 1.`) within a numbered major section; always prefix with the section number (`X.1`, `X.2`, `X.3`, etc.).
+

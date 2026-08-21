@@ -35,33 +35,44 @@ def test_verify_workspace_environment():
     assert "endpoint_status" in status
     assert status["python_supported"] is True
     assert "numpy" in status["dependencies"]
+    assert "faiss" in status["dependencies"]
 
 
-def test_bpe_tokenizer_train_encode_decode():
+def test_bpe_tokenizer_lossless_roundtrip():
     corpus = [
         "Retrieval Augmented Generation",
         "Dense vector embeddings",
-        "Cache Augmented Generation preloading"
+        "Cache Augmented Generation preloading",
+        "Hybrid search combines BM25 and dense vectors"
     ]
     tokenizer = BPETokenizer()
-    tokenizer.train(corpus, num_merges=15)
+    tokenizer.train(corpus, num_merges=30)
 
     assert len(tokenizer.vocab) > 0
     assert len(tokenizer.merges) > 0
 
-    text = "Dense embeddings"
-    tokens = tokenizer.encode(text)
-    assert len(tokens) > 0
-    assert isinstance(tokens, list)
+    # Test standard sentence
+    text1 = "Dense embeddings"
+    tokens1 = tokenizer.encode(text1)
+    assert len(tokens1) > 0
+    assert isinstance(tokens1, list)
+    assert tokenizer.decode(tokens1) == text1
 
-    decoded = tokenizer.decode(tokens)
-    assert decoded == text
+    # Test complex spacing: leading, trailing, multiple spaces, tabs, newlines
+    text2 = "  Cache-Augmented \t embeddings\n\noptimize   dense retrieval!  "
+    tokens2 = tokenizer.encode(text2)
+    assert tokenizer.decode(tokens2) == text2, "BPE Tokenizer must be strictly 1:1 lossless on arbitrary whitespace!"
 
-    comp_ratio = tokenizer.compression_ratio(text)
+    # Test ID encoding and decoding
+    token_ids = tokenizer.encode_to_ids(text2)
+    assert len(token_ids) == len(tokens2)
+    assert tokenizer.decode_from_ids(token_ids) == text2
+
+    comp_ratio = tokenizer.compression_ratio(text1)
     assert comp_ratio > 0.0
 
 
-def test_context_budget_calculator():
+def test_context_budget_calculator_and_document_capacity():
     calc = ContextBudgetCalculator(
         total_context=8192,
         max_generation_tokens=1024,
@@ -82,6 +93,18 @@ def test_context_budget_calculator():
     assert budget["allocated_retrieval_tokens"] == expected_k * 512
     assert budget["slack_tokens"] == 8192 - (fixed_overhead + expected_k * 512)
     assert 0 < budget["utilization_percent"] <= 100
+
+    # Test physical document capacity calculation
+    capacity = ContextBudgetCalculator.compute_document_capacity(
+        token_count=budget["allocated_retrieval_tokens"],
+        compression_ratio=4.0,
+        avg_word_length=5.0
+    )
+    assert capacity["retrieval_tokens"] == expected_k * 512
+    assert capacity["estimated_characters"] == (expected_k * 512) * 4
+    assert capacity["estimated_words"] == ((expected_k * 512) * 4) // 5
+    assert capacity["estimated_pages"] > 0
+    assert capacity["raw_payload_kb"] > 0
 
 
 def test_kv_cache_memory_calculation():
@@ -132,6 +155,8 @@ def test_simulate_high_dimensional_orthogonality():
         assert abs(stats[d]["mean_cosine"]) < 0.1
         assert stats[d]["std_cosine"] > 0
         assert math.isclose(stats[d]["expected_std"], 1.0 / math.sqrt(d), rel_tol=1e-4)
+        assert "raw_samples" in stats[d]
+        assert len(stats[d]["raw_samples"]) == 100
 
 
 def test_retrieval_benchmark_harness():
@@ -144,8 +169,17 @@ def test_retrieval_benchmark_harness():
     assert res["mean_latency_ms"] >= 0
     assert res["throughput_ops_sec"] > 0
 
-    # Test vector similarity benchmark
+    # Test exact vector similarity benchmark
     vec_bench = harness.benchmark_vector_similarity(num_vectors=100, dimension=64, iterations=5)
     assert vec_bench["num_vectors"] == 100
     assert vec_bench["dimension"] == 64
     assert vec_bench["vector_comparisons_per_sec"] > 0
+
+    # Test indexed vector search benchmark with FAISS
+    indexed_hnsw = harness.benchmark_indexed_vector_search(num_vectors=200, dimension=64, index_type="hnsw", iterations=5)
+    assert indexed_hnsw["index_type"] == "HNSW"
+    assert indexed_hnsw["queries_per_sec"] > 0
+
+    indexed_ivf = harness.benchmark_indexed_vector_search(num_vectors=200, dimension=64, index_type="ivf", iterations=5)
+    assert indexed_ivf["index_type"] == "IVF"
+    assert indexed_ivf["queries_per_sec"] > 0

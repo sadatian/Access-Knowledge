@@ -73,6 +73,13 @@ These scripts serve two key purposes:
 - Every section must include a dedicated, rich, and exhaustive code execution demonstration that exercises virtually every feature, method, parameter, pipeline stage, and realistic edge case of the system.
 - Output from demonstrations must be structured, clear, and informative, showing real inputs, intermediate pipeline states, and final evaluation results.
 
+### 2.8 Hierarchical Subsection Numbering
+- All subsection headings must explicitly include their parent section number as a prefix.
+  - In Section 2: `### 2.1. The Byte-Pair Encoding (BPE) Algorithm`, `### 2.2. Subword Merge Hierarchy Diagram`, `### 2.3. Conceptual Bridge...`.
+  - In Section 4: `#### 4.1. Metric Geometries`, `#### 4.2. Unit-Norm Equivalence`, `#### 4.3. The Curse of Dimensionality...`.
+  - In Section 6: `### 6.1. Metric Space Selection Guide`, `### 6.2. Vector Index Architecture Comparison`.
+- Never use un-prefixed numbering (e.g., `### 1.`, `### 2.`, `#### 1.`) within a numbered major section; always prefix with the section number (`X.1`, `X.2`, `X.3`, etc.).
+
 ---
 
 ## 3. Module Roadmap & Curriculum Checklist
