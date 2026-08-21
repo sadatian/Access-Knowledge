@@ -41,6 +41,8 @@ import numpy as np
 from openai import OpenAI
 from IPython.display import display, Image
 import io
+from IPython.display import display, Image
+import io
 
 # %% [markdown]
 # ## Section 1: Workspace Health Diagnostics & Environment Configuration
@@ -157,8 +159,14 @@ class BPETokenizer:
 
     def train(self, corpus: List[str], num_merges: int = 50) -> "BPETokenizer":
         """Train the BPE tokenizer on a corpus by iteratively learning `num_merges` merge rules."""
+        # 0. Sentinel Token Collision Check
+        if any(self.SPACE_MARKER in text for text in corpus):
+            raise ValueError(f"Sentinel collision: Raw corpus contains the '{self.SPACE_MARKER}' character. "
+                             "Please map raw inputs to a strict byte representation for lossless reconstruction.")
+
         # 1. Transform texts into atomic symbol sequences preserving all whitespace, tabs, and newlines
-        tokenized_corpus = [self._text_to_symbols(text) for text in corpus]
+        # Optimization: Count unique sequence frequencies instead of iterating the entire corpus O(N^3)
+        seq_freqs = Counter(tuple(self._text_to_symbols(text)) for text in corpus)
 
         # 2. Extract base character vocabulary with full ASCII byte fallback (0-255) for complete OOV coverage
         base_symbols = set([self.SPACE_MARKER])
@@ -166,19 +174,18 @@ class BPETokenizer:
             c = chr(i)
             if c != " ":
                 base_symbols.add(c)
-        for seq in tokenized_corpus:
+        for seq in seq_freqs.keys():
             base_symbols.update(seq)
         
         self.vocab = sorted(list(base_symbols))
         self.merges = []
 
         # 3. Iterative pair extraction and merging
-        current_sequences = tokenized_corpus
         for _ in range(num_merges):
             pairs = defaultdict(int)
-            for seq in current_sequences:
+            for seq, count in seq_freqs.items():
                 for i in range(len(seq) - 1):
-                    pairs[(seq[i], seq[i + 1])] += 1
+                    pairs[(seq[i], seq[i + 1])] += count
                     
             if not pairs:
                 break
@@ -191,10 +198,10 @@ class BPETokenizer:
             if merged_token not in self.vocab:
                 self.vocab.append(merged_token)
 
-            # Apply merge across all sequences
-            new_sequences = []
+            # Apply merge across all unique sequences
+            new_seq_freqs = Counter()
             first, second = best_pair
-            for seq in current_sequences:
+            for seq, count in seq_freqs.items():
                 new_seq = []
                 i = 0
                 while i < len(seq):
@@ -204,8 +211,8 @@ class BPETokenizer:
                     else:
                         new_seq.append(seq[i])
                         i += 1
-                new_sequences.append(new_seq)
-            current_sequences = new_sequences
+                new_seq_freqs[tuple(new_seq)] += count
+            seq_freqs = new_seq_freqs
 
         # 4. Build index mapping tables
         self.token_to_id = {token: idx for idx, token in enumerate(self.vocab)}
@@ -292,6 +299,13 @@ print(f"Compression Ratio: {compression:.2f} chars/token")
 # - **At $R_{\text{comp}} = 2.8$ (Dense Source Code / JSON triplets):** $16,800\text{ chars} \approx 3,294\text{ words} \approx 6.6\text{ pages}$ ($16.4\text{ KB}$).
 #
 # Understanding this mathematical translation is critical when sizing chunk ingestion pipelines and provisioning GPU VRAM.
+
+# %% [markdown]
+# ### 2.4. Embedding Model Token Limits
+# Before scaling up to LLM multi-thousand token contexts (e.g., 128k tokens), standard embedding models impose strict maximum sequence lengths. 
+# For example, BERT-based embedding models typically cap at 512 tokens, and modern open-source models cap at 8192 tokens. 
+# Retrieval chunking strategies must first satisfy this *embedding model limit* to prevent semantic truncation before they are packed into the broader LLM context window.
+
 
 # %%
 # collapse_input
@@ -744,6 +758,8 @@ print(f"  • Exact Flat (FlatIP):  {flat_perf['mean_latency_ms']:.3f} ms ({flat
 print(f"  • Inverted File (IVF):  {ivf_perf['mean_latency_ms']:.3f} ms ({ivf_perf['queries_per_sec']:,.0f} QPS)")
 print(f"  • Proximity Graph (HNSW): {hnsw_perf['mean_latency_ms']:.3f} ms ({hnsw_perf['queries_per_sec']:,.0f} QPS)")
 
+
+
 # %% [markdown]
 # ## Section 5: Architectural Decision Matrix & Synthesis Dashboard
 #
@@ -779,3 +795,5 @@ print(f"  • Proximity Graph (HNSW): {hnsw_perf['mean_latency_ms']:.3f} ms ({hn
 # - Synthesized the comprehensive **Distance Metric & Index Architecture Decision Matrix**.
 #
 # In **Module 02**, we will build on these vector and lexical foundations to implement **Sparse Search (BM25)**, **GPU-Accelerated Dense Semantic Search**, and fuse them using **Reciprocal Rank Fusion (RRF)**.
+
+
