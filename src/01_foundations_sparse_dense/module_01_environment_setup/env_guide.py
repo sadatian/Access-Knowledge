@@ -464,13 +464,83 @@ print(f"  • Throughput:   {tok_perf['tokens_per_sec']:,.0f} tokens/sec")
 # $$K_{\text{max}} = \left\lfloor \frac{W_{\text{total}} - (T_{\text{system}} + T_{\text{query}} + T_{\text{history}} + T_{\text{generation}} + T_{\text{safety}})}{C - \text{overlap}} \right\rfloor$$
 #
 # ### 3.2. KV-Cache GPU Memory Footprint
-# In modern Transformer decoders with Multi-Head Attention (MHA) or Grouped-Query Attention (GQA), each layer stores Key and Value tensors for all context tokens $T_{\text{context}}$:
-# $$\text{Memory}_{\text{KV}} = 2 \times n_{\text{layers}} \times n_{\text{kv\_heads}} \times d_{\text{head}} \times T_{\text{context}} \times b_{\text{precision}}$$
+# In modern Transformer decoders with Multi-Head Attention (MHA) or Grouped-Query Attention (GQA),
+# each attention layer stores Key (K) and Value (V) tensors for every token currently present in the KV cache.
+# For a batch of $B$ sequences, the raw KV-cache memory is:
+#
+# $$M_{\text{KV}} =
+# 2 \times B \times L \times n_{\text{KV}} \times d_{\text{head}} \times T \times b_{\text{elem}}$$
+#
 # where:
-# - $n_{\text{layers}}$ is the number of transformer layers (e.g., 32 for 8B, 80 for 70B, 128 for 405B).
-# - $n_{\text{kv\_heads}}$ is the number of Key/Value heads ($n_{\text{kv\_heads}} = n_{\text{heads}}$ in MHA; $n_{\text{kv\_heads}} \ll n_{\text{heads}}$ in GQA).
-# - $d_{\text{head}}$ is the dimension per attention head (typically 128).
-# - $b_{\text{precision}}$ is the byte width per parameter (2 bytes for FP16/BF16, 1 byte for FP8, 0.5 bytes for INT4).
+# - $B$ is the batch size, i.e., the number of sequences whose KV caches are stored.
+# - $L$ is the number of Transformer layers.
+# - $n_{\text{KV}}$ is the number of Key/Value heads per layer.
+# - $d_{\text{head}}$ is the dimensionality of each attention head.
+# - $T$ is the number of tokens currently stored in the KV cache per sequence.
+# - $b_{\text{elem}}$ is the number of bytes used to store each K/V scalar.
+#
+# The factor of $2$ accounts for storing both the Key and Value tensors:
+#
+# $$2 = 1_{\text{K}} + 1_{\text{V}}$$
+#
+# For Multi-Head Attention (MHA), every attention head has a corresponding K/V head:
+#
+# $$n_{\text{KV}} = n_{\text{heads}}$$
+#
+# In Grouped-Query Attention (GQA), multiple query heads share the same K/V head:
+#
+# $$n_{\text{KV}} < n_{\text{heads}}$$
+#
+# In the special case of Multi-Query Attention (MQA), all query heads share a single K/V head:
+#
+# $$n_{\text{KV}} = 1$$
+#
+# The element size depends on the data type used to store the KV cache. For example:
+#
+# $$b_{\text{elem}} =
+# \begin{cases}
+# 2 & \text{for FP16/BF16},\\
+# 1 & \text{for FP8},\\
+# 0.5 & \text{for INT4}.
+# \end{cases}$$
+#
+# Thus, for a single sequence ($B=1$), the KV-cache memory scales linearly with the number of layers,
+# K/V heads, head dimension, and cached sequence length:
+#
+# $$M_{\text{KV}} \propto
+# L \times n_{\text{KV}} \times d_{\text{head}} \times T$$
+#
+# During autoregressive generation, $T$ should include all tokens whose K/V states remain cached,
+# including both the original prompt and previously generated tokens. If the prompt contains
+# $T_{\text{prompt}}$ tokens and $N_{\text{gen}}$ tokens have been generated so far, then:
+#
+# $$T = T_{\text{prompt}} + N_{\text{gen}}$$
+#
+# The expression above represents the raw storage required for the K/V tensor values.
+# In practice, the actual GPU memory allocation may be somewhat larger because implementations
+# can require additional storage for quantization scales, metadata, padding, memory alignment,
+# and cache-management structures.
+#
+# The formula above gives memory in bytes. To express the KV-cache footprint in GiB, divide by $2^{30}$:
+#
+# $$M_{\text{KV,GiB}} =
+# \frac{M_{\text{KV}}}{2^{30}}$$
+#
+# Therefore, the raw KV-cache footprint is:
+#
+# $$\boxed{
+# M_{\text{KV}} =
+# 2 \times B \times L \times n_{\text{KV}} \times d_{\text{head}} \times T \times b_{\text{elem}}
+# }$$
+#
+# or, equivalently, in GiB:
+#
+# $$\boxed{
+# M_{\text{KV,GiB}} =
+# \frac{
+# 2 \times B \times L \times n_{\text{KV}} \times d_{\text{head}} \times T \times b_{\text{elem}}
+# }{2^{30}}
+# }$$
 
 # %%
 # collapse_input
