@@ -15,23 +15,6 @@
 # 5. **Presenter Dashboard & Attention Heatmap (`# collapse_input`)**: Auto-collapsing ASCII reranking and compression visualizer.
 #
 # ---
-#
-# ```mermaid
-# graph TD
-#     Query["User Query"] --> BiEncoder["Stage 1: Bi-Encoder Fast Vector Retrieval (Top-50)"]
-#     BiEncoder --> Candidates["50 Rough Candidate Documents"]
-#     
-#     Candidates --> CrossEncoder["Stage 2: Cross-Encoder Joint Self-Attention (GPU)"]
-#     CrossEncoder --> Reranked["Top-5 Precision Reranked Documents"]
-#     
-#     Reranked --> Compressor["Stage 3: LLMLingua-Style Token Compressor (40-60% Pruning)"]
-#     Compressor --> Compressed["Information-Dense Compressed Passages"]
-#     
-#     Compressed --> Reorderer["Stage 4: Lost-in-the-Middle Edge Reorderer"]
-#     Reorderer --> PromptContext["Optimized Prompt: [Rank 1, Rank 3, Rank 4, Rank 2] -> LLM"]
-# ```
-#
-# ---
 
 # %%
 import math

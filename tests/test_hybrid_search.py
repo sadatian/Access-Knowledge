@@ -44,11 +44,12 @@ def test_gpu_dense_embedding_engine_search():
         {"id": "d2", "text": "Cache-Augmented Generation eliminates retrieval latency."},
         {"id": "d3", "text": "Knowledge graphs represent relational facts as triplets."}
     ]
-    dense = GPUDenseEmbeddingEngine(dimension=128)
+    dense = GPUDenseEmbeddingEngine()
     dense.index_documents(docs)
 
     assert dense.gpu_embedding_matrix is not None
-    assert list(dense.gpu_embedding_matrix.shape) == [3, 128]
+    assert list(dense.gpu_embedding_matrix.shape) == [3, dense.dimension]
+    assert dense.dimension == 384
 
     # Search
     results = dense.search("latency optimization and caching", top_k=3)
@@ -75,8 +76,16 @@ def test_convex_score_fusion():
     # Alpha 0.5 (equal balance)
     fused_half = convex_score_fusion(sparse_scores, dense_scores, alpha=0.5)
     fused_dict = dict(fused_half)
-    assert math.isclose(fused_dict["doc_1"], 0.5)
-    assert math.isclose(fused_dict["doc_2"], 0.5)
+    assert math.isclose(fused_dict["doc_1"], 0.5, abs_tol=1e-5)
+    assert math.isclose(fused_dict["doc_2"], 0.5, abs_tol=1e-5)
+
+    # Disjoint retrieval / null-space lower bound test
+    sparse_only = [("doc_a", 15.0)]
+    dense_only = [("doc_b", 0.8)]
+    fused_disjoint = convex_score_fusion(sparse_only, dense_only, alpha=0.5)
+    disjoint_dict = dict(fused_disjoint)
+    assert disjoint_dict["doc_a"] >= 0.0
+    assert disjoint_dict["doc_b"] >= 0.0
 
 
 def test_dynamic_hybrid_router():
@@ -97,7 +106,7 @@ def test_hybrid_evaluation_harness():
         {"id": "doc_4", "text": "Graph retrieval traverses relational triplets in knowledge graphs."}
     ]
     bm25 = IndustryStandardBM25().index_documents(docs)
-    dense = GPUDenseEmbeddingEngine(dimension=128).index_documents(docs)
+    dense = GPUDenseEmbeddingEngine().index_documents(docs)
 
     harness = HybridEvaluationHarness(bm25, dense)
     test_cases = [

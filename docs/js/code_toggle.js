@@ -38,8 +38,15 @@ function initCodeToggle() {
       prompt.setAttribute("aria-expanded", "true");
     }
 
-    // Configure accessibility and tooltip
-    prompt.title = "Click to collapse/expand code";
+    // Configure accessibility and tooltip with execution timing
+    const execTimeBadge = editor.querySelector(".jp-ExecutionTime");
+    const execTimeText = execTimeBadge ? execTimeBadge.textContent.trim() : "";
+    if (execTimeText) {
+      prompt.dataset.execTime = execTimeText;
+      prompt.title = `Execution time: ${execTimeText} | Click to collapse/expand code`;
+    } else {
+      prompt.title = "Click to collapse/expand code";
+    }
     prompt.setAttribute("role", "button");
     prompt.setAttribute("tabindex", "0");
 

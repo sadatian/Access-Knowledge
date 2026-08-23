@@ -29,6 +29,7 @@ plugins:
   - mkdocs-jupyter:
       include_source: true
       execute: true
+      record_timing: true
       include: ["src/**/**/*.py", "src/**/*.py", "src/*.py"]
 
 markdown_extensions:
@@ -42,11 +43,7 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
@@ -60,8 +57,7 @@ markdown_extensions:
 
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
-  - js/mermaid_zoom.js
+  - https://cdn.plot.ly/plotly-2.35.2.min.js
   - js/code_toggle.js
 
 extra_css:
@@ -96,4 +92,4 @@ nav:
     - "Multi-Agent Collaborative Retrieval": src/06_agentic_retrieval_mcp/module_17_multi_agent_retrieval/multi_agent_retrieval_guide.py
   - "Track 7: Evaluation & Production Guardrails":
     - "Retrieval Evaluation & Benchmarking (Ragas)": src/07_eval_observability_guardrails/module_18_rag_evaluation_benchmarks/rag_eval_guide.py
-    - "Security, Injection Defenses & Guardrails": src/07_eval_observability_guardrails/module_19_security_guardrails/guardrails_guide.py"
+    - "Security, Injection Defenses & Guardrails": src/07_eval_observability_guardrails/module_19_security_guardrails/guardrails_guide.py

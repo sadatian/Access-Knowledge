@@ -10,17 +10,13 @@
 #
 # ## The Modern Knowledge Retrieval Spectrum
 #
-# ```mermaid
-# graph LR
-#     subgraph Spectrum ["The Knowledge Augmentation Spectrum"]
-#         A["1. Lexical / BM25"] --> B["2. Dense Vector RAG"]
-#         B --> C["3. Hybrid & Reranked RAG"]
-#         C --> D["4. GraphRAG / KAG"]
-#         D --> E["5. Cache-Augmented Gen (CAG)"]
-#         E --> F["6. Fine-Tuning & LoRA"]
-#         F --> G["7. Agentic RAG & MCP"]
-#     end
-# ```
+# 1. **Lexical / BM25:** Inverted indexes and keyword matching.
+# 2. **Dense Vector RAG:** Embedding search on unit hyperspheres with FAISS.
+# 3. **Hybrid & Reranked RAG:** Fused reciprocal rank scoring with cross-encoder precision.
+# 4. **GraphRAG / KAG:** Knowledge graphs and entity-relationship triplet traversals.
+# 5. **Cache-Augmented Gen (CAG):** Preloaded KV-cache prefill for instant context inference.
+# 6. **Fine-Tuning & LoRA:** Parametric adaptation and representation alignment.
+# 7. **Agentic RAG & MCP:** Dynamic tool orchestration, ReAct loops, and multi-agent consensus.
 #
 # ---
 

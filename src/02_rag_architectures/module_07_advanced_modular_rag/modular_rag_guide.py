@@ -13,30 +13,6 @@
 # 4. **Presenter Dashboard & State Machine Visualizer (`# collapse_input`)**: Auto-collapsing ASCII state machine and reflection token audit log.
 #
 # ---
-#
-# ```mermaid
-# graph TD
-#     UserQ["User Query"] --> AdaptRouter{"Adaptive RAG Router"}
-#     
-#     AdaptRouter -->|Low Complexity| DirectLLM["Direct LLM (Zero Retrieval)"]
-#     AdaptRouter -->|Moderate Complexity| SingleHop["Single-Hop Retrieval"]
-#     AdaptRouter -->|High Complexity| MultiHop["Multi-Hop Iterative Loop"]
-#     
-#     SingleHop --> CRAGEval{"CRAG Confidence Evaluator"}
-#     MultiHop --> CRAGEval
-#     
-#     CRAGEval -->|Confidence >= 0.75| KnowledgeStripe["Knowledge Striping -> Direct Gen"]
-#     CRAGEval -->|Confidence < 0.35| WebFallback["External Fallback / Web Search"]
-#     CRAGEval -->|0.35 <= Conf < 0.75| RefineFuse["Query Refinement + Hybrid Fusion"]
-#     
-#     KnowledgeStripe --> SelfRAG["Self-RAG Reflection Verification"]
-#     WebFallback --> SelfRAG
-#     RefineFuse --> SelfRAG
-#     
-#     SelfRAG -->|IsSup=FullySupported & IsUse>=4| FinalOutput["Faithful Verified Response"]
-# ```
-#
-# ---
 
 # %%
 import math

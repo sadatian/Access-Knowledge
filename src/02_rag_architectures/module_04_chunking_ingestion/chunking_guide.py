@@ -15,26 +15,6 @@
 # 5. **Presenter Dashboard & Visualizer (`# collapse_input`)**: Auto-collapsing ASCII chunk tree and boundary visualizer.
 #
 # ---
-#
-# ```mermaid
-# graph TD
-#     Doc["Raw Ingestion Document (MD / Code / Tables)"] --> Parser{"Structural Parser"}
-#     
-#     Parser -->|Markdown AST| RecMD["Recursive Structural Chunker"]
-#     Parser -->|Python Source| CodeChunk["AST Class/Function Chunker"]
-#     Parser -->|Tabular Data| TableChunk["Header-Preserving Table Chunker"]
-#     Parser -->|Raw Narrative| SemChunk["Semantic Gradient Drop Chunker"]
-#     
-#     RecMD --> Hierarchy["Hierarchical Parent-Child Store"]
-#     CodeChunk --> Hierarchy
-#     TableChunk --> Hierarchy
-#     SemChunk --> Hierarchy
-#     
-#     Hierarchy --> SmallChild["Small Child Chunks (Index / Dense Search)"]
-#     Hierarchy --> FullParent["Full Parent Sections (LLM Generation Context)"]
-# ```
-#
-# ---
 
 # %%
 import ast

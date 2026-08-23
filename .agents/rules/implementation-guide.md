@@ -61,3 +61,7 @@ Whenever you are asked to make changes, debug, or write new tutorials in this wo
   - In Section 6: `### 6.1. Metric Space Selection Guide`, `### 6.2. Vector Index Architecture Comparison`.
 - **Never Use Isolated Numbers:** Do not use un-prefixed numbering (e.g. `### 1.`, `### 2.`, `#### 1.`) within a numbered major section; always prefix with the section number (`X.1`, `X.2`, `X.3`, etc.).
 
+## 10. Avoid Mermaid Diagrams
+- **No Mermaid Usage:** Do NOT use Mermaid diagrams anywhere in this project. Avoid all ` ```mermaid ` fences, Mermaid scripts, and custom Mermaid styling.
+- **Alternatives:** Use clean Markdown lists/tables, ASCII art/Unicode box diagrams, LaTeX mathematical equations, or static Python image/SVG plots generated via `matplotlib`/`IPython.display.SVG` within `# collapse_input` presenter cells.
+

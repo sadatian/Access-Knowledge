@@ -16,28 +16,6 @@
 # 6. **Presenter Dashboard & Transformation Inspector (`# collapse_input`)**: Auto-collapsing ASCII query transformation and routing inspector.
 #
 # ---
-#
-# ```mermaid
-# graph TD
-#     RawQuery["Raw User Query"] --> Router{"Semantic Collection Router"}
-#     
-#     RawQuery --> MultiQuery["1. Multi-Query Expander (K Variations)"]
-#     RawQuery --> StepBack["2. Step-Back Abstractor (High-Level Concepts)"]
-#     RawQuery --> Decompose["3. Sub-Query Decomposer (Atomic Queries)"]
-#     RawQuery --> HyDE["4. HyDE Generator (Document Space Projection)"]
-#     
-#     MultiQuery --> ParallelSearch["Parallel Multi-Path Search"]
-#     StepBack --> ParallelSearch
-#     Decompose --> ParallelSearch
-#     HyDE --> ParallelSearch
-#     
-#     ParallelSearch --> RRFFusion["Reciprocal Rank Fusion (RRF)"]
-#     Router -->|Collection Target| TargetDB[("Target Vector Collection")]
-#     RRFFusion --> TargetDB
-#     TargetDB --> UnifiedTopK["Unified Re-Ranked Top-K Context"]
-# ```
-#
-# ---
 
 # %%
 import math

@@ -15,31 +15,6 @@
 # 6. **Presenter Visualizer & Dashboard (`# collapse_input`)**: Auto-collapsing ASCII Pareto efficiency visualizer.
 #
 # ---
-#
-# ```mermaid
-# graph TD
-#     subgraph FlatSpace ["1. FAISS Exact Flat (faiss.IndexFlatIP / GPU)"]
-#         F1["GPU Brute Force Dot Product over All N Vectors (RTX 4080)"]
-#     end
-#
-#     subgraph IVFSpace ["2. FAISS Inverted File Index (faiss.IndexIVFFlat / GPU)"]
-#         C["K Centroids (Voronoi Cells)"] --> P["Probe n_probe Closest Centroids"]
-#         P --> L["Scan Only Vectors in Target Lists"]
-#     end
-#
-#     subgraph HNSWSpace ["3. FAISS HNSW Graph (faiss.IndexHNSWFlat)"]
-#         L2["Layer 2: Sparse Highway Skip-Connections"] --> L1["Layer 1: Medium-Range Clusters"]
-#         L1 --> L0["Layer 0: Dense Local Proximity Graph (efSearch)"]
-#     end
-#
-#     subgraph PQSpace ["4. FAISS Product Quantization (faiss.IndexPQ)"]
-#         D["Vector R^D"] --> M["M Sub-Vectors (D/M)"]
-#         M --> CB["K_sub Centroids per Subspace"]
-#         CB --> ADC["Asymmetric Distance Table (64x Memory Reduction)"]
-#     end
-# ```
-#
-# ---
 
 # %%
 import math
