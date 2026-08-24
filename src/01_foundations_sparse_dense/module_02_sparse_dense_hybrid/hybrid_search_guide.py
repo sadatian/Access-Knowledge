@@ -9,12 +9,11 @@
 #
 # In this module, we construct and master:
 # 1. **Production Sparse Search with `rank_bm25` (BM25Okapi)**: Industry-standard Robertson-Spärck Jones probabilistic relevance model, term frequency saturation, and document length normalization with global corpus statistics.
-# 2. **Neural Dense Semantic Search (`sentence-transformers` & PyTorch)**: Transformer bi-encoder embedding generation (`all-MiniLM-L6-v2`), mean pooling, explicit $L_2$ normalization onto unit hypersphere $\mathbb{S}^{D-1}$, and vectorized cosine retrieval via `torch.mv()`.
+# 2. **Neural Dense Semantic Search (`sentence-transformers` & PyTorch)**: Modern transformer bi-encoder embedding generation (`google/embeddinggemma-300m`), mean pooling, explicit $L_2$ normalization onto unit hypersphere $\mathbb{S}^{D-1}$, and vectorized cosine retrieval via `torch.mv()`.
 # 3. **The Out-of-Vocabulary (OOV) Orthogonality Theoretical Bridge**: Proof of latent subspace collapse on alphanumeric identifiers directly motivating hybrid fusion.
 # 4. **Hybrid Rank Fusion Algorithms & Continuous Neural Intent Routing**: Reciprocal Rank Fusion (RRF), Standardized Convex Score Fusion with distribution anchoring, and a continuous Multi-Layer Perceptron (MLP) routing head regressing $\alpha \in [0, 1]$.
 # 5. **Deterministic Failure-Mode Unit Test Suite**: Unit validation across synthetic edge-case queries (Cases A through D) using Mean Reciprocal Rank (MRR@3).
 # 6. **Architectural Decision Matrix & Alpha Sweep Visualizer**: Consolidated decision matrix and dual-panel visualizer plotting system-level sensitivity curves, observed plateaus, and analytical document crossover dynamics across $\alpha \in [0, 1]$.
-# 7. **Neural Encoder Appendix**: Side-by-side architectural comparison between legacy `all-MiniLM-L6-v2` and modern `google/embeddinggemma-300m`.
 #
 # ---
 
@@ -214,7 +213,7 @@ for rank, (doc_id, score) in enumerate(bm25_results, 1):
 #
 # ### 2.1. Neural Bi-Encoder Architecture & Geometric Projection
 #
-# A Transformer bi-encoder (e.g. `all-MiniLM-L6-v2`) processes text sequences through multi-head self-attention layers:
+# A Transformer bi-encoder (e.g. `google/embeddinggemma-300m`) processes text sequences through multi-head self-attention layers:
 # 1. **Tokenization & Contextual Encoding**: Maps subword tokens to contextual hidden representations $\mathbf{H} = [\mathbf{h}_1, \mathbf{h}_2, \dots, \mathbf{h}_L] \in \mathbb{R}^{L \times D}$.
 # 2. **Mean Pooling**: Aggregates token vectors across sequence length $L$ while masking padding tokens:
 #    $$\mathbf{u}_{\text{raw}} = \frac{\sum_{i=1}^L m_i \mathbf{h}_i}{\sum_{i=1}^L m_i} \in \mathbb{R}^D$$
@@ -235,7 +234,7 @@ class DenseEmbeddingEngine:
 
     def __init__(
         self,
-        model_name: str = "all-MiniLM-L6-v2",
+        model_name: str = "google/embeddinggemma-300m",
         device: Optional[torch.device] = None,
         dimension: Optional[int] = None,
         **kwargs: Any,
@@ -247,7 +246,7 @@ class DenseEmbeddingEngine:
         print(f"[INFO] Loading Neural Bi-Encoder '{model_name}' onto {self.device}...")
         self.model = SentenceTransformer(model_name, device=str(self.device))
         
-        # Extract embedding dimension (D = 384 for all-MiniLM-L6-v2)
+        # Extract embedding dimension (D = 768 for google/embeddinggemma-300m)
         if dimension is not None:
             self.dimension = dimension
         elif hasattr(self.model, "get_embedding_dimension"):
@@ -319,7 +318,7 @@ GPUDenseEmbeddingEngine = DenseEmbeddingEngine
 # Below, we instantiate the neural embedding engine and execute a **pure semantic paraphrase query** with zero keyword overlap.
 
 # %%
-dense_engine = DenseEmbeddingEngine(model_name="all-MiniLM-L6-v2", device=DEVICE)
+dense_engine = DenseEmbeddingEngine(model_name="google/embeddinggemma-300m", device=DEVICE)
 dense_engine.index_documents(enterprise_corpus)
 gpu_dense_engine = dense_engine
 
@@ -346,15 +345,15 @@ for rank, (doc_id, sim) in enumerate(dense_results, 1):
 #
 # While dense neural bi-encoders excel at semantic generalization, they suffer from a fundamental geometric failure mode when encountering exact alphanumeric identifiers, serial numbers, product SKUs, or technical error codes:
 #
-# 1. **Subword Tokenization Fragmentation (WordPiece / BPE)**:
-#    Transformer tokenizers rely on fixed vocabularies (~30,000 tokens). When an unseen technical identifier (e.g., `ERR_KV_CACHE_OVERFLOW_503`) is presented, the tokenizer cannot represent it atomically. Instead, it aggressively fractures the string into disjoint subword tokens:
+# 1. **Subword Tokenization Fragmentation (WordPiece / BPE / SentencePiece)**:
+#    Transformer tokenizers rely on fixed vocabularies. When an unseen technical identifier (e.g., `ERR_KV_CACHE_OVERFLOW_503`) is presented, the tokenizer cannot represent it atomically. Instead, it aggressively fractures the string into disjoint subword tokens:
 #    $$\text{Tokenizer}(\text{"ERR\_KV\_CACHE\_OVERFLOW\_503"}) \to [\text{"ERR"}, \text{"\_"}, \text{"KV"}, \text{"\_"}, \text{"CACHE"}, \text{"\_"}, \text{"OVER"}, \text{"FLOW"}, \text{"\_"}, \text{"503"}]$$
 #
 # 2. **Contextual Attention Dispersion & Random Walk in Latent Space**:
 #    Because this arbitrary token sequence was never observed as a cohesive semantic unit during pre-training, the multi-head self-attention layers fail to route contextual activation energy. Mean pooling across these fragmented hidden states produces a vector $\mathbf{q}_{\text{code}} \in \mathbb{R}^D$ that behaves like a random linear combination of unrelated subword embeddings.
 #
 # 3. **High-Dimensional Geometric Orthogonality on $\mathbb{S}^{D-1}$**:
-#    In high-dimensional embedding spaces ($D=384$ for MiniLM, $D=768$ for Gemma), two independent or unaligned unit vectors are almost strictly orthogonal with high probability:
+#    In high-dimensional embedding spaces ($D=768$ for EmbeddingGemma-300m), two independent or unaligned unit vectors are almost strictly orthogonal with high probability:
 #    $$\mathbb{E}[\hat{\mathbf{u}} \cdot \hat{\mathbf{v}}] = 0 \quad \text{for } \hat{\mathbf{u}}, \hat{\mathbf{v}} \sim \text{Uniform}(\mathbb{S}^{D-1}), \quad \operatorname{Var}(\hat{\mathbf{u}} \cdot \hat{\mathbf{v}}) = \frac{1}{D}$$
 #    As a result, the cosine similarity between the query code and the target document collapses ($\cos(\hat{\mathbf{q}}_{\text{code}}, \hat{\mathbf{d}}_{\text{target}}) \approx 0$). Dense retrieval produces severe **semantic drift**, returning irrelevant documents that happen to share generic subword fragments.
 #
@@ -507,7 +506,7 @@ def convex_score_fusion(
 class ContinuousMLPHybridRouter(nn.Module):
     """Continuous Machine-Learning Query Intent Router mapping dense query latent space to alpha in (0, 1)."""
 
-    def __init__(self, embedding_dim: int = 384, hidden_dim: int = 64):
+    def __init__(self, embedding_dim: int = 768, hidden_dim: int = 64):
         super().__init__()
         self.embedding_dim = embedding_dim
         # Lightweight 2-layer MLP projection head
@@ -556,6 +555,14 @@ class ContinuousMLPHybridRouter(nn.Module):
                 rationale = f"Balanced multi-faceted query -> Continuous hybrid weighting (alpha={calibrated_alpha:.2f})"
 
         return calibrated_alpha, rationale
+
+    def compute_query_alpha(self, query: str, dense_engine: Optional[DenseEmbeddingEngine] = None) -> Tuple[float, str]:
+        """Backward-compatible helper."""
+        engine = dense_engine or gpu_dense_engine
+        return self.predict_alpha(query, engine)
+
+# Backward-compatible alias
+DynamicHybridRouter = ContinuousMLPHybridRouter
 
 # %% [markdown]
 # ### Demo 3: Comprehensive Fusion & Continuous MLP Routing Demonstration
@@ -722,7 +729,7 @@ print(f"  • Hybrid RRF MRR:   {benchmark_report['hybrid_mrr']:.4f}")
 # | Engine Component | Underlying Technology | Metric Space | Hardware Acceleration | Latency Regime ($N=10^5$) |
 # | :--- | :--- | :--- | :--- | :--- |
 # | **Sparse Retriever** | `rank_bm25` (Robertson-Spärck Jones) | Inverted Index Term Frequency | CPU Multi-threading | $\sim 2.0 - 5.0\text{ ms}$ |
-# | **Dense Encoder** | `sentence-transformers` (`all-MiniLM-L6-v2` / `embeddinggemma-300m`) | $\mathbb{S}^{383} \subset \mathbb{R}^{384}$ / $\mathbb{S}^{767} \subset \mathbb{R}^{768}$ | Vectorized Tensor Engine | $\sim 0.5 - 2.0\text{ ms}$ |
+# | **Dense Encoder** | `sentence-transformers` (`google/embeddinggemma-300m`) | $\mathbb{S}^{767} \subset \mathbb{R}^{768}$ | Vectorized Tensor Engine | $\sim 0.5 - 2.0\text{ ms}$ |
 # | **Vector Search Backend**| PyTorch Tensor Matrix Multiplication (`torch.mv`) | Normalized Inner Product | In-Memory Tensor Engine | $\sim 0.1 - 0.4\text{ ms}$ |
 # | **Hybrid Fusion Layer** | Reciprocal Rank Fusion / Standardized Convex Combination | Unified Combined Score | In-Memory (Zero Copy) | $< 0.05\text{ ms}$ |
 #
@@ -1025,129 +1032,10 @@ plot_alpha_sensitivity_sweep(bm25_searcher, dense_engine, eval_test_suite)
 #
 # In this module, we have established the theoretical foundations and production implementation of hybrid search:
 # - Leveraged the standard **`rank_bm25.BM25Okapi`** library for exact keyword matching, Robertson-Spärck Jones inverse document frequency, and document length normalization with distribution anchoring.
-# - Implemented a neural **Dense Embedding Engine** utilizing `sentence-transformers` (`all-MiniLM-L6-v2`), explicit $L_2$ normalization onto $\mathbb{S}^{D-1}$, and vectorized cosine retrieval via `torch.mv()`.
+# - Implemented a neural **Dense Embedding Engine** utilizing `sentence-transformers` (`google/embeddinggemma-300m`), explicit $L_2$ normalization onto $\mathbb{S}^{D-1}$, and vectorized cosine retrieval via `torch.mv()`.
 # - Established the **Out-of-Vocabulary (OOV) Orthogonality Theoretical Bridge**, explaining how subword fragmentation projects exact alphanumeric identifiers into orthogonal vector coordinates, motivating hybrid fusion.
 # - Constructed **Reciprocal Rank Fusion (RRF)**, **Standardized Convex Score Fusion**, and **Continuous MLP Query Intent Routing**, achieving optimal retrieval across failure-mode unit tests.
 # - Synthesized the comprehensive **Hybrid Fusion Decision Matrix** and visualized the continuous dense/sparse sensitivity and document crossover dynamics across $\alpha \in [0, 1]$.
 #
 # In **Module 03**, we scale dense vector search to millions of embeddings using the industry-standard **FAISS** library (`faiss.IndexFlatIP`, `faiss.IndexIVFFlat`, `faiss.IndexHNSWFlat`, and `faiss.IndexPQ`).
-#
-# ---
 
-# %% [markdown]
-# ## Section 7: Appendix — Neural Encoder Architecture Selection (Legacy MiniLM vs. Modern SOTA EmbeddingGemma)
-#
-# To evaluate retrieval quality differences between the legacy `all-MiniLM-L6-v2` (~2021) baseline and modern transformer architectures like `google/embeddinggemma-300m` (>4 years newer), we execute a side-by-side retrieval benchmark measuring **Semantic Separation Margin ($\Delta = \text{Sim}_{\text{target}} - \text{Sim}_{\text{distractor}}$)**, **MRR@3**, and **Confidence Calibration**.
-
-# %%
-def compare_embedding_engine_metrics(
-    corpus: List[Dict[str, str]],
-    test_queries: List[Dict[str, str]],
-    dense_engine: Optional[DenseEmbeddingEngine] = None,
-    legacy_model_name: str = "all-MiniLM-L6-v2",
-    modern_model_name: str = "google/embeddinggemma-300m",
-) -> Dict[str, Any]:
-    """Execute side-by-side dense semantic retrieval evaluation comparing legacy vs modern neural bi-encoders."""
-    legacy_engine = dense_engine or DenseEmbeddingEngine(model_name=legacy_model_name, device=DEVICE)
-    if not legacy_engine.doc_ids:
-        legacy_engine.index_documents(corpus)
-    
-    legacy_results = []
-    for q_item in test_queries:
-        q_text = q_item["query"]
-        target_id = q_item["target_id"]
-        res = legacy_engine.search(q_text, top_k=len(corpus))
-        
-        target_score = next((score for doc_id, score in res if doc_id == target_id), 0.0)
-        top1_id, top1_score = res[0] if res else ("None", 0.0)
-        distractor_score = res[1][1] if len(res) > 1 and res[0][0] == target_id else top1_score
-        
-        rank = next((i + 1 for i, (doc_id, _) in enumerate(res) if doc_id == target_id), 0)
-        rr = (1.0 / rank) if rank > 0 else 0.0
-        margin = target_score - (distractor_score if rank == 1 else top1_score)
-        
-        legacy_results.append({
-            "query": q_text,
-            "target_id": target_id,
-            "rank": rank,
-            "rr": rr,
-            "target_score": target_score,
-            "margin": margin,
-            "top1_id": top1_id,
-        })
-        
-    legacy_mrr = float(np.mean([r["rr"] for r in legacy_results]))
-    legacy_avg_margin = float(np.mean([r["margin"] for r in legacy_results]))
-
-    modern_specs = {
-        "model_name": modern_model_name,
-        "release_year": "2025/2026 (>4 Years Newer)",
-        "parameters": "308M (13.5x capacity)",
-        "context_window": "2,048 tokens (4x larger)",
-        "embedding_dim": "768 (Matryoshka scalable to 128/256/512)",
-        "mteb_ndcg10": "55.4 (vs 41.9 for MiniLM)",
-        "avg_semantic_margin": round(legacy_avg_margin + 0.28, 4),
-        "expected_mrr": 1.0,
-    }
-
-    return {
-        "legacy_specs": {
-            "model_name": legacy_model_name,
-            "release_year": "~2021",
-            "parameters": "22.7M",
-            "context_window": "256 / 512 tokens",
-            "embedding_dim": legacy_engine.dimension,
-            "mteb_ndcg10": "41.9",
-            "mrr": round(legacy_mrr, 4),
-            "avg_semantic_margin": round(legacy_avg_margin, 4),
-        },
-        "modern_specs": modern_specs,
-        "query_evaluations": legacy_results,
-    }
-
-comparison_queries = [
-    {
-        "query": "avoid inference delay by storing prompt state",
-        "target_id": "doc_cag_01"
-    },
-    {
-        "query": "probabilistic relevance scoring using term frequency and saturation",
-        "target_id": "doc_sparse_02"
-    },
-    {
-        "query": "approximate nearest neighbor proximity graphs in vector databases",
-        "target_id": "doc_vector_07"
-    }
-]
-
-comparison_metrics = compare_embedding_engine_metrics(
-    corpus=enterprise_corpus,
-    test_queries=comparison_queries,
-    dense_engine=dense_engine,
-)
-
-# %%
-# collapse_input
-print("=" * 95)
-print("       SIDE-BY-SIDE NEURAL ENCODER BENCHMARK: all-MiniLM-L6-v2 vs. google/embeddinggemma-300m")
-print("=" * 95)
-
-l_spec = comparison_metrics["legacy_specs"]
-m_spec = comparison_metrics["modern_specs"]
-
-print(f"{'Metric / Feature':<32}{l_spec['model_name']:<30}{m_spec['model_name']:<30}")
-print("-" * 95)
-print(f"{'Release Era':<32}{l_spec['release_year']:<30}{m_spec['release_year']:<30}")
-print(f"{'Parameter Scale':<32}{l_spec['parameters']:<30}{m_spec['parameters']:<30}")
-print(f"{'Context Window':<32}{l_spec['context_window']:<30}{m_spec['context_window']:<30}")
-print(f"{'Vector Dimensionality':<32}{str(l_spec['embedding_dim']):<30}{m_spec['embedding_dim']:<30}")
-print(f"{'MTEB Retrieval (NDCG@10)':<32}{l_spec['mteb_ndcg10']:<30}{m_spec['mteb_ndcg10']:<30}")
-print(f"{'Benchmark MRR@3':<32}{l_spec['mrr']:<30.4f}{m_spec['expected_mrr']:<30.4f}")
-print(f"{'Avg Target Separation Margin':<32}{l_spec['avg_semantic_margin']:<30.4f}{m_spec['avg_semantic_margin']:<30.4f}")
-print("=" * 95)
-
-print("\nDetailed Per-Query Retrieval Metrics:")
-print(f"{'Query':<52}{'Target':<14}{'Top-1 ID':<14}{'Cosine Sim':<12}{'Margin (Δ)':<10}")
-print("-" * 102)
-for row in comparison_metrics["query_evaluations"]:
-    print(f"{row['query']:<52}{row['target_id']:<14}{row['top1_id']:<14}{row['target_score']:<12.4f}{row['margin']:<10.4f}")

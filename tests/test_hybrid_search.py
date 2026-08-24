@@ -49,9 +49,9 @@ def test_gpu_dense_embedding_engine_search():
     dense = GPUDenseEmbeddingEngine()
     dense.index_documents(docs)
 
-    assert dense.gpu_embedding_matrix is not None
-    assert list(dense.gpu_embedding_matrix.shape) == [3, dense.dimension]
-    assert dense.dimension == 384
+    assert dense.embedding_matrix is not None
+    assert list(dense.embedding_matrix.shape) == [3, dense.dimension]
+    assert dense.dimension in [384, 768]
 
     # Search
     results = dense.search("latency optimization and caching", top_k=3)
