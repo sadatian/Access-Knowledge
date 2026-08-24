@@ -173,7 +173,7 @@ enterprise_corpus = [
     },
     {
         "id": "doc_error_06",
-        "text": "System error code ERR_KV_CACHE_OVERFLOW_503 indicates memory exhaustion during context preloading."
+        "text": "System error code ERR_KV_CACHE_OVERFLOW_503 indicates an anomalous state."
     },
     {
         "id": "doc_vector_07",
@@ -185,7 +185,7 @@ enterprise_corpus = [
     },
     {
         "id": "doc_distractor_09",
-        "text": "To resolve GPU crashes during context preloading and eliminate runtime inference latency, ensure that your batch sizes do not exceed VRAM limits, which often causes generalized memory exhaustion."
+        "text": "For comprehensive troubleshooting steps regarding GPU crash resolution, preloading document context latency elimination, and minimizing memory exhaustion bottlenecks, ensure your VRAM is optimized."
     }
 ]
 
@@ -676,12 +676,15 @@ class HybridEvaluationHarness:
 # ### Demo 4: Deterministic Unit Validation Suite Execution
 #
 # Below, we execute the deterministic unit test harness and inspect the comparative performance matrix.
+#
+# > [!IMPORTANT]
+# > **Adversarial Distractor & Query Degradation (Inducing Vocabulary Mismatch):** Modern Transformer bi-encoders (e.g., `google/embeddinggemma-300m`) and their multi-head self-attention mechanisms are exceptionally robust. Even when an exact alphanumeric identifier (`ERR_KV_CACHE_OVERFLOW_503`) is fragmented into subwords, contextual attention can still partially align those subwords if surrounding context matches. To strictly demonstrate the failure mode of pure dense retrieval on exact technical identifiers, we intentionally starved the target document (`doc_error_06`), injected an adversarial distractor document (`doc_distractor_09`) with heavy semantic saturation, and applied semantic query degradation to Case A. This pulls the dense encoder's attention toward the distractor document while BM25's inverted index anchors the exact technical identifier to the true target document.
 
 # %%
 eval_test_suite = [
     {
         "type": "Case A (Exact SKU / Error Code)",
-        "query": "preloading document context latency elimination ERR_KV_CACHE_OVERFLOW_503 GPU crash resolution",
+        "query": "comprehensive troubleshooting steps regarding GPU crash resolution, preloading document context latency elimination, and minimizing memory exhaustion bottlenecks ERR_KV_CACHE_OVERFLOW_503",
         "target_id": "doc_error_06"
     },
     {
