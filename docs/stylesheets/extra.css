@@ -6,9 +6,11 @@
 :root {
   /* Site-wide body font */
   --md-text-font: "Nunito", "Noto Color Emoji", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif !important;
-  --md-primary-fg-color: #880e4f; /* Darker magenta for standard text */
-  --md-typeset-a-color: #880e4f; 
-  --md-nav-item-color--active: #d81b60; /* Higher contrast active state */
+  --md-primary-fg-color: #880e4f;
+  /* Darker magenta for standard text */
+  --md-typeset-a-color: #880e4f;
+  --md-nav-item-color--active: #d81b60;
+  /* Higher contrast active state */
 }
 
 /* Setting page zoom to 90% */
@@ -1154,9 +1156,9 @@ p:has(> .doc-section-title):has(+ details.example) {
 }
 
 /* Suppress Material's default pseudo-element icon on github-alert to eliminate double rendering */
-.md-typeset .admonition.github-alert > .admonition-title::before,
-.md-typeset .github-alert > .admonition-title::before,
-.admonition.github-alert > .admonition-title::before,
+.md-typeset .admonition.github-alert>.admonition-title::before,
+.md-typeset .github-alert>.admonition-title::before,
+.admonition.github-alert>.admonition-title::before,
 .github-alert .admonition-title::before {
   display: none !important;
   content: none !important;
@@ -1168,8 +1170,8 @@ p:has(> .doc-section-title):has(+ details.example) {
   position: static !important;
 }
 
-.md-typeset .admonition.github-alert > .admonition-title,
-.admonition.github-alert > .admonition-title {
+.md-typeset .admonition.github-alert>.admonition-title,
+.admonition.github-alert>.admonition-title {
   padding-left: 0 !important;
 }
 
@@ -1199,6 +1201,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left: 4px solid #1976d2 !important;
   background-color: rgba(25, 118, 210, 0.05) !important;
 }
+
 .admonition.note>.admonition-title,
 .admonition.info>.admonition-title,
 .github-alert-note .admonition-title,
@@ -1212,6 +1215,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left: 4px solid #7d2a44 !important;
   background-color: rgba(125, 42, 68, 0.05) !important;
 }
+
 .admonition.important>.admonition-title,
 .github-alert-important .admonition-title {
   color: #7d2a44 !important;
@@ -1225,6 +1229,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left: 4px solid #e65100 !important;
   background-color: rgba(230, 81, 0, 0.05) !important;
 }
+
 .admonition.warning>.admonition-title,
 .admonition.caution>.admonition-title,
 .github-alert-warning .admonition-title,
@@ -1240,6 +1245,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left: 4px solid #2e7d32 !important;
   background-color: rgba(46, 125, 50, 0.05) !important;
 }
+
 .admonition.tip>.admonition-title,
 .admonition.success>.admonition-title,
 .github-alert-tip .admonition-title,
@@ -1255,6 +1261,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left: 4px solid #c62828 !important;
   background-color: rgba(198, 40, 40, 0.05) !important;
 }
+
 .admonition.danger>.admonition-title,
 .admonition.failure>.admonition-title,
 .github-alert-danger .admonition-title,
@@ -1277,6 +1284,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left-color: #42a5f5 !important;
   background-color: rgba(66, 165, 245, 0.12) !important;
 }
+
 [data-md-color-scheme="slate"] .admonition.note>.admonition-title,
 [data-md-color-scheme="slate"] .admonition.info>.admonition-title,
 [data-md-color-scheme="slate"] .github-alert-note .admonition-title,
@@ -1289,6 +1297,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left-color: #bc7085 !important;
   background-color: rgba(188, 112, 133, 0.15) !important;
 }
+
 [data-md-color-scheme="slate"] .admonition.important>.admonition-title,
 [data-md-color-scheme="slate"] .github-alert-important .admonition-title {
   color: #e79eb2 !important;
@@ -1301,6 +1310,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left-color: #ffa726 !important;
   background-color: rgba(255, 167, 38, 0.12) !important;
 }
+
 [data-md-color-scheme="slate"] .admonition.warning>.admonition-title,
 [data-md-color-scheme="slate"] .admonition.caution>.admonition-title,
 [data-md-color-scheme="slate"] .github-alert-warning .admonition-title,
@@ -1315,6 +1325,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left-color: #66bb6a !important;
   background-color: rgba(102, 187, 106, 0.12) !important;
 }
+
 [data-md-color-scheme="slate"] .admonition.tip>.admonition-title,
 [data-md-color-scheme="slate"] .admonition.success>.admonition-title,
 [data-md-color-scheme="slate"] .github-alert-tip .admonition-title,
@@ -1329,6 +1340,7 @@ p:has(> .doc-section-title):has(+ details.example) {
   border-left-color: #ef5350 !important;
   background-color: rgba(239, 83, 80, 0.12) !important;
 }
+
 [data-md-color-scheme="slate"] .admonition.danger>.admonition-title,
 [data-md-color-scheme="slate"] .admonition.failure>.admonition-title,
 [data-md-color-scheme="slate"] .github-alert-danger .admonition-title,
