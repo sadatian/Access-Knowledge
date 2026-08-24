@@ -86,6 +86,8 @@ class IndustryStandardBM25:
         self.doc_ids: List[str] = []
         self.corpus_mean: float = 0.0
         self.corpus_std: float = 1.0
+        self.corpus_log_mean: float = 0.0
+        self.corpus_log_std: float = 1.0
 
     def tokenize(self, text: str) -> List[str]:
         """Tokenize text: lowercase, punctuation removal, whitespace splitting, and stopword filtering."""
@@ -114,8 +116,17 @@ class IndustryStandardBM25:
             if sample_scores:
                 self.corpus_mean = float(np.mean(sample_scores))
                 self.corpus_std = float(np.std(sample_scores)) if np.std(sample_scores) > 1e-6 else 1.0
+                log_samples = np.log1p(np.maximum(0.0, sample_scores))
+                self.corpus_log_mean = float(np.mean(log_samples))
+                self.corpus_log_std = float(np.std(log_samples)) if np.std(log_samples) > 1e-6 else 1.0
 
         return self
+
+    def get_score_stats(self, log_scale: bool = False) -> Tuple[float, float]:
+        """Return cached corpus score distribution parameters (mean, std) in raw or log-transformed scale."""
+        if log_scale:
+            return (self.corpus_log_mean, self.corpus_log_std)
+        return (self.corpus_mean, self.corpus_std)
 
     def search(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
         """Retrieve top-K documents ranked by BM25 relevance score."""
@@ -198,7 +209,7 @@ bm25_searcher.index_documents(enterprise_corpus)
 print("=== [Industry Standard BM25 (rank_bm25) Status] ===")
 print(f"Total Indexed Documents: {len(bm25_searcher.doc_ids)}")
 print(f"Average Document Length: {bm25_searcher.bm25_model.avgdl:.2f} tokens")
-print(f"Anchored Score Distribution: μ = {bm25_searcher.corpus_mean:.3f}, σ = {bm25_searcher.corpus_std:.3f}")
+print(f"Anchored Score Distribution: raw μ = {bm25_searcher.corpus_mean:.3f}, σ = {bm25_searcher.corpus_std:.3f} | log μ = {bm25_searcher.corpus_log_mean:.3f}, σ = {bm25_searcher.corpus_log_std:.3f}")
 
 # Query with exact technical identifier
 query_code = "ERR_KV_CACHE_OVERFLOW_503 memory exhaustion"
@@ -420,8 +431,9 @@ for rank, (doc_id, sim) in enumerate(dense_results, 1):
 #    $$\tilde{S}_m(d) = \frac{S_m(d) - \mu_m}{\sigma_m + \epsilon}$$
 #
 #    > [!IMPORTANT]
-#    > **Addressing BM25 Heavy Right-Tail Skewness with Log Transformation:** BM25 score distributions often exhibit heavy right-tail skewness (approximating a power law), whereas dense cosine similarities are generally bounded in $[-1, 1]$ and roughly normal. Directly fusing an unbounded heavy-tailed distribution using linear Z-score standardization can allow extreme BM25 outliers to dominate the fused score space. To guarantee mathematical balance, we implement a logarithmic compression step prior to ZMUV standardization:
-#    > $$\tilde{S}_{\text{sparse}}(d) = \frac{\ln(S_{\text{sparse}}(d) + 1) - \mu_{\ln S}}{\sigma_{\ln S} + \epsilon}, \quad \tilde{S}_{\text{dense}}(d) = \frac{S_{\text{dense}}(d) - \mu_{\text{dense}}}{\sigma_{\text{dense}} + \epsilon}$$
+#    > **Addressing BM25 Heavy Right-Tail Skewness with Log Transformation:** BM25 score distributions often exhibit heavy right-tail skewness (approximating a power law), whereas dense cosine similarities are generally bounded in $[-1, 1]$ and roughly normal. Directly fusing an unbounded heavy-tailed distribution using linear Z-score standardization can allow extreme BM25 outliers to dominate the fused score space. To guarantee mathematical balance, we implement a logarithmic compression step with a domain-bounding non-negativity constraint $\max(0, S_{\text{sparse}})$ prior to ZMUV standardization:
+#    > $$\tilde{S}_{\text{sparse}}(d) = \frac{\ln(\max(0, S_{\text{sparse}}(d)) + 1) - \mu_{\ln S}}{\sigma_{\ln S} + \epsilon}, \quad \tilde{S}_{\text{dense}}(d) = \frac{S_{\text{dense}}(d) - \mu_{\text{dense}}}{\sigma_{\text{dense}} + \epsilon}$$
+#    > The $\max(0, S_{\text{sparse}})$ non-negativity constraint strictly bounds inputs to the positive domain $[0, \infty)$, preventing domain errors $\ln(x)$ where $x \le 0$ on unexpected negative or null candidate scores.
 #
 # ### 3.3. Gated Neuro-Symbolic Intent Routing (MLP Routing Head)
 #
@@ -461,7 +473,20 @@ def convex_score_fusion(
     log_sparse: bool = True,
     eps: float = 1e-9,
 ) -> List[Tuple[str, float]]:
-    """Fuse scores using Min-Max Feature Scaling (default) or Zero-Mean Unit-Variance (ZMUV) Normalization."""
+    """Fuse scores using Min-Max Feature Scaling (default) or Zero-Mean Unit-Variance (ZMUV) Normalization.
+
+    Args:
+        sparse_scores: List of (doc_id, score) pairs from sparse retrieval.
+        dense_scores: List of (doc_id, score) pairs from dense retrieval.
+        alpha: Dense modality weight in [0, 1]. (1 - alpha) is applied to sparse.
+        method: Score normalization strategy ('minmax' or 'zscore' / 'standardized' / 'zmuv').
+        sparse_stats: Optional (mu, sigma) baseline population parameters for sparse scores in the active space
+                      (i.e., log-scale parameters if log_sparse=True, raw parameters if log_sparse=False).
+                      If None, empirical parameters are computed dynamically from the candidate pool.
+        dense_stats: Optional (mu, sigma) baseline population parameters for dense cosine similarities.
+        log_sparse: If True, applies log-compression ln(max(0, S) + 1) to sparse scores prior to standardization.
+        eps: Small epsilon preventing division by zero.
+    """
     sparse_dict = dict(sparse_scores)
     dense_dict = dict(dense_scores)
     
@@ -495,16 +520,15 @@ def convex_score_fusion(
         return sorted(hybrid_scores, key=lambda x: x[1], reverse=True)
 
     elif method in ("standardized", "zscore", "zmuv"):
-        # Zero-Mean, Unit-Variance (ZMUV) Normalization with optional log-skew compression
+        # Zero-Mean, Unit-Variance (ZMUV) Normalization with domain-bounded log-skew compression
         if log_sparse:
             s_raw_map = {did: float(np.log1p(max(0.0, sparse_dict.get(did, 0.0)))) for did in all_doc_ids}
         else:
             s_raw_map = {did: float(sparse_dict.get(did, 0.0)) for did in all_doc_ids}
 
         if sparse_stats is not None:
+            # When sparse_stats are supplied externally, they must represent the active metric space
             s_mu, s_sigma = sparse_stats
-            if log_sparse:
-                s_mu, s_sigma = float(np.log1p(max(0.0, s_mu))), float(np.log1p(max(0.0, s_sigma)))
         else:
             s_vals = list(s_raw_map.values())
             s_mu, s_sigma = float(np.mean(s_vals)), float(np.std(s_vals))
@@ -773,7 +797,9 @@ print(f"  • Hybrid RRF MRR:   {benchmark_report['hybrid_mrr']:.4f}")
 # | **Min-Max Convex Score Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Min-Max $[0, 1]$ feature scaling | Low (bounded in $[0, 1]$) | Native via Gated MLP routing | Clean bounded score fusion preserving relative distribution dynamics. |
 # | **Zero-Mean, Unit-Variance (ZMUV) Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Log-scale + distribution anchoring $(\mu, \sigma)$ | Low to Moderate | Native via Gated MLP routing | Continuous late fusion preserving relative variance with log-skew compression. |
 # | **Gated Neuro-Symbolic MLP Routing** | $\alpha = \text{Gated}(\text{MLP}(\mathbf{q}), f_{\text{OOV}})$ | Learned projection + fragmentation gating | Low | Built-in | Optimal for heterogeneous enterprise workloads with mixed SKU/semantic queries. |
-# | **Cross-Encoder Re-ranking** | $\text{Score}_{\text{CE}}(Q, D)$ | Model-based scoring | Low | Downstream stage | High-accuracy second-stage re-ranking over Top-$K$ candidates. |
+#
+# > [!NOTE]
+# > **Late Fusion Aggregation vs. Sequential Re-ranking**: The algorithms above represent **Parallel Late Fusion Aggregation** mechanisms that combine disparate inverted index and dense vector rankings concurrently. In contrast, **Cross-Encoder Re-ranking** (e.g. `cross-encoder/ms-marco-MiniLM-L-6-v2`) is a **Sequential Pipeline Stage** applied downstream to the top-$K$ candidates retrieved by late fusion to compute joint query-document cross-attention scores.
 #
 # ### 5.2. Engine Architecture Specifications
 #
