@@ -11,7 +11,7 @@
 # 1. **Production Sparse Search with `rank_bm25` (BM25Okapi)**: Industry-standard Robertson-Spärck Jones probabilistic relevance model, term frequency saturation, and document length normalization with global corpus statistics.
 # 2. **Neural Dense Semantic Search (`sentence-transformers` & PyTorch)**: Modern transformer bi-encoder embedding generation (`google/embeddinggemma-300m`), mean pooling, explicit $L_2$ normalization onto unit hypersphere $\mathbb{S}^{D-1}$, and vectorized cosine retrieval via `torch.mv()`.
 # 3. **The Out-of-Vocabulary (OOV) Orthogonality Theoretical Bridge**: Proof of latent subspace collapse on alphanumeric identifiers directly motivating hybrid fusion.
-# 4. **Hybrid Rank Fusion Algorithms & Continuous Neural Intent Routing**: Reciprocal Rank Fusion (RRF), Standardized Convex Score Fusion with distribution anchoring, and a continuous Multi-Layer Perceptron (MLP) routing head regressing $\alpha \in [0, 1]$.
+# 4. **Hybrid Rank Fusion Algorithms & Continuous Neural Intent Routing**: Reciprocal Rank Fusion (RRF), Min-Max Convex Score Fusion, and a continuous Multi-Layer Perceptron (MLP) routing head regressing $\alpha \in [0, 1]$.
 # 5. **Deterministic Failure-Mode Unit Test Suite**: Unit validation across synthetic edge-case queries (Cases A through D) using Mean Reciprocal Rank (MRR@3).
 # 6. **Architectural Decision Matrix & Alpha Sweep Visualizer**: Consolidated decision matrix and dual-panel visualizer plotting system-level sensitivity curves, observed plateaus, and analytical document crossover dynamics across $\alpha \in [0, 1]$.
 #
@@ -382,23 +382,24 @@ for rank, (doc_id, sim) in enumerate(dense_results, 1):
 # - $k = 60$ is the standard smoothing constant (Cormack et al., 2009) that prevents high-ranking outliers from dominating the fused score.
 # - $w_m$ is an optional retriever importance weight (default $1.0$).
 #
-# ### 3.2. Standardized Convex Score Fusion & Distribution Anchoring
+# ### 3.2. Min-Max Convex Score Fusion & Bounded Scaling
 #
-# Combining unbounded sparse BM25 scores with bounded cosine similarity $\in [-1, 1]$ directly is mathematically invalid due to extreme scale and variance mismatch. We utilize **Standardized Convex Score Fusion**:
+# Combining unbounded sparse BM25 scores with bounded cosine similarity $\in [-1, 1]$ directly is mathematically invalid due to extreme scale and variance mismatch. We utilize **Convex Score Fusion**:
 #
-# 1. **Distribution-Anchored Standardization (Variance Alignment)**:
-#    Standardizes scores using anchored corpus population statistics $(\mu_m, \sigma_m)$ to prevent micro-batch sample variance:
+# 1. **Min-Max Feature Scaling (Bounded Null Space - Default)**:
+#    Maps raw scores to a clean, fixed $[0, 1]$ interval with unretrieved candidate zero-bounding:
 #
-#    $$\tilde{S}_m(d) = \frac{S_m(d) - \mu_m}{\sigma_m + \epsilon}$$
+#    $$\tilde{S}_m(d) = \frac{S_m(d) - \min(S_m \cup \{0\})}{\max(S_m \cup \{0\}) - \min(S_m \cup \{0\}) + \epsilon}$$
 #
 #    $$\text{Score}_{\text{hybrid}}(d) = \alpha \cdot \tilde{S}_{\text{dense}}(d) + (1 - \alpha) \cdot \tilde{S}_{\text{sparse}}(d)$$
 #
-#    *Why Distribution Anchoring?* Calculating sample mean $\mu$ and sample standard deviation $\sigma$ across micro-batches of top-$k$ results ($k=4$) introduces extreme sample variance. Anchoring to precomputed index statistics guarantees unit variance spread ($\sigma=1.0$) independent of batch size.
+#    *Why Bounded Min-Max Scaling?* Bounding retriever score distributions to $[0, 1]$ ensures both modalities contribute symmetrically without BM25 term-frequency spikes dominating or distorting the combined score space.
 #
-# 2. **Min-Max Feature Scaling (Bounded Null Space)**:
-#    Maps raw scores to a fixed $[0, 1]$ interval with unretrieved candidate zero-bounding:
+# 2. **Distribution-Anchored Standardization (Variance Alignment)**:
+#    Alternatively standardizes scores using anchored corpus population statistics $(\mu_m, \sigma_m)$ to prevent micro-batch sample variance:
 #
-#    $$\tilde{S}_m(d) = \frac{S_m(d) - \min(S_m \cup \{0\})}{\max(S_m \cup \{0\}) - \min(S_m \cup \{0\}) + \epsilon}$$
+#    $$\tilde{S}_m(d) = \frac{S_m(d) - \mu_m}{\sigma_m + \epsilon}$$
+#
 #
 # ### 3.3. Continuous Neural Intent Routing (MLP Routing Head)
 #
@@ -434,20 +435,45 @@ def convex_score_fusion(
     sparse_scores: List[Tuple[str, float]],
     dense_scores: List[Tuple[str, float]],
     alpha: float = 0.5,
-    method: str = "standardized",
+    method: str = "minmax",
     sparse_stats: Optional[Tuple[float, float]] = None,
     dense_stats: Optional[Tuple[float, float]] = None,
     eps: float = 1e-9,
 ) -> List[Tuple[str, float]]:
-    """Fuse scores using Standardized Convex Score Fusion (default) or Min-Max Feature Scaling."""
+    """Fuse scores using Min-Max Feature Scaling (default) or Standardized Z-Score Fusion."""
     sparse_dict = dict(sparse_scores)
     dense_dict = dict(dense_scores)
-    all_doc_ids = list(dict.fromkeys(list(sparse_dict.keys()) + list(dense_dict.keys())))
+    
+    # Neutral alphabetical ordering to prevent implicit dense rank leakage on 0.0 ties
+    all_doc_ids = sorted(set(sparse_dict.keys()).union(set(dense_dict.keys())))
 
     if not all_doc_ids:
         return []
 
-    if method in ("standardized", "zscore"):
+    if method == "minmax":
+        # Min-Max Feature Scaling with unretrieved null-space lower bounding in [0, 1]
+        s_vals = list(sparse_dict.values()) + [0.0]
+        s_min, s_max = min(s_vals), max(s_vals)
+        s_range = (s_max - s_min) + eps
+
+        d_vals = list(dense_dict.values()) + [0.0]
+        d_min, d_max = min(d_vals), max(d_vals)
+        d_range = (d_max - d_min) + eps
+
+        hybrid_scores = []
+        for doc_id in all_doc_ids:
+            raw_s = sparse_dict.get(doc_id, 0.0)
+            raw_d = dense_dict.get(doc_id, 0.0)
+
+            norm_s = (raw_s - s_min) / s_range
+            norm_d = (raw_d - d_min) / d_range
+
+            score = alpha * norm_d + (1.0 - alpha) * norm_s
+            hybrid_scores.append((doc_id, float(score)))
+
+        return sorted(hybrid_scores, key=lambda x: x[1], reverse=True)
+
+    elif method in ("standardized", "zscore"):
         # Distribution-Anchored Standardization
         if sparse_stats is not None:
             s_mu, s_sigma = sparse_stats
@@ -476,31 +502,8 @@ def convex_score_fusion(
 
         return sorted(hybrid_scores, key=lambda x: x[1], reverse=True)
 
-    elif method == "minmax":
-        # Min-Max Feature Scaling with unretrieved null-space lower bounding
-        s_vals = list(sparse_dict.values()) + [0.0]
-        s_min, s_max = min(s_vals), max(s_vals)
-        s_range = (s_max - s_min) + eps
-
-        d_vals = list(dense_dict.values()) + [0.0]
-        d_min, d_max = min(d_vals), max(d_vals)
-        d_range = (d_max - d_min) + eps
-
-        hybrid_scores = []
-        for doc_id in all_doc_ids:
-            raw_s = sparse_dict.get(doc_id, 0.0)
-            raw_d = dense_dict.get(doc_id, 0.0)
-
-            norm_s = (raw_s - s_min) / s_range
-            norm_d = (raw_d - d_min) / d_range
-
-            score = alpha * norm_d + (1.0 - alpha) * norm_s
-            hybrid_scores.append((doc_id, float(score)))
-
-        return sorted(hybrid_scores, key=lambda x: x[1], reverse=True)
-
     else:
-        raise ValueError(f"Unknown fusion method '{method}'. Supported methods: 'standardized', 'minmax'.")
+        raise ValueError(f"Unknown fusion method '{method}'. Supported methods: 'minmax', 'standardized'.")
 
 
 class ContinuousMLPHybridRouter(nn.Module):
@@ -528,6 +531,9 @@ class ContinuousMLPHybridRouter(nn.Module):
 
     def forward(self, q_emb: torch.Tensor) -> torch.Tensor:
         """Forward pass regressing continuous alpha parameter: q in R^D -> alpha in (0, 1)."""
+        param_device = next(self.parameters()).device
+        param_dtype = next(self.parameters()).dtype
+        q_emb = q_emb.to(device=param_device, dtype=param_dtype)
         if q_emb.dim() == 1:
             q_emb = q_emb.unsqueeze(0)
         return self.mlp(q_emb).squeeze(-1)
@@ -573,7 +579,7 @@ DynamicHybridRouter = ContinuousMLPHybridRouter
 mlp_router = ContinuousMLPHybridRouter(embedding_dim=dense_engine.dimension).to(DEVICE)
 
 test_queries = [
-    "ERR_KV_CACHE_OVERFLOW_503",
+    "ERR_KV_CACHE_OVERFLOW_503 crash resolution",
     "How does preloading prompt context eliminate inference latency?",
     "BM25 lexical index with dense semantic vectors"
 ]
@@ -586,9 +592,7 @@ for q in test_queries:
     
     rrf_res = reciprocal_rank_fusion(sparse_res, dense_res, k=60)
     convex_res = convex_score_fusion(
-        sparse_res, dense_res, alpha=dyn_alpha,
-        sparse_stats=(bm25_searcher.corpus_mean, bm25_searcher.corpus_std),
-        dense_stats=(dense_engine.corpus_mean, dense_engine.corpus_std),
+        sparse_res, dense_res, alpha=dyn_alpha, method="minmax"
     )
     
     print("=" * 75)
@@ -673,7 +677,7 @@ class HybridEvaluationHarness:
 eval_test_suite = [
     {
         "type": "Case A (Exact SKU / Error Code)",
-        "query": "preloading document context latency elimination ERR_KV_CACHE_OVERFLOW_503",
+        "query": "ERR_KV_CACHE_OVERFLOW_503 crash resolution",
         "target_id": "doc_error_06"
     },
     {
@@ -719,8 +723,8 @@ print(f"  • Hybrid RRF MRR:   {benchmark_report['hybrid_mrr']:.4f}")
 # | Fusion Strategy | Mathematical Formulation | Calibration Needed | Outlier Sensitivity | Dynamic Routing Support | Production Recommendation |
 # | :--- | :--- | :--- | :--- | :--- | :--- |
 # | **Reciprocal Rank Fusion (RRF)** | $\sum \frac{w_m}{k + r_m(d)}$ | None (pure ordinal ranks) | Zero (damped by $k=60$) | Supported via retriever weights $w_m$ | **Gold Standard Default** for enterprise multi-source RAG. |
-# | **Standardized Convex Score Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Distribution Anchoring $(\mu, \sigma)$ | Low (unit variance aligned) | Native via continuous MLP routing | Robust continuous fusion preserving relative distribution spreads. |
-# | **Min-Max Feature Scaling** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Required (Min-Max $[0, 1]$ scaling) | Critical (vulnerable to BM25 spikes) | Native via continuous MLP routing | Simple bounded fusion; sensitive to extreme term frequency outliers. |
+# | **Min-Max Convex Score Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Min-Max $[0, 1]$ feature scaling | Low (bounded in $[0, 1]$) | Native via continuous MLP routing | Clean bounded score fusion preserving relative distribution dynamics. |
+# | **Standardized Convex Score Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Distribution Anchoring $(\mu, \sigma)$ | Moderate | Native via continuous MLP routing | Continuous fusion preserving relative distribution spreads. |
 # | **Continuous MLP Query Routing** | $\alpha = \sigma(\text{MLP}(\mathbf{q}))$ | Learned projection head | Low | Built-in | Optimal for heterogeneous enterprise workloads. |
 # | **Cross-Encoder Re-ranking** | $\text{Score}_{\text{CE}}(Q, D)$ | Model-based scoring | Low | Downstream stage | High-accuracy second-stage re-ranking over Top-$K$ candidates. |
 #
@@ -731,7 +735,7 @@ print(f"  • Hybrid RRF MRR:   {benchmark_report['hybrid_mrr']:.4f}")
 # | **Sparse Retriever** | `rank_bm25` (Robertson-Spärck Jones) | Inverted Index Term Frequency | CPU Multi-threading | $\sim 2.0 - 5.0\text{ ms}$ |
 # | **Dense Encoder** | `sentence-transformers` (`google/embeddinggemma-300m`) | $\mathbb{S}^{767} \subset \mathbb{R}^{768}$ | Vectorized Tensor Engine | $\sim 0.5 - 2.0\text{ ms}$ |
 # | **Vector Search Backend**| PyTorch Tensor Matrix Multiplication (`torch.mv`) | Normalized Inner Product | In-Memory Tensor Engine | $\sim 0.1 - 0.4\text{ ms}$ |
-# | **Hybrid Fusion Layer** | Reciprocal Rank Fusion / Standardized Convex Combination | Unified Combined Score | In-Memory (Zero Copy) | $< 0.05\text{ ms}$ |
+# | **Hybrid Fusion Layer** | Reciprocal Rank Fusion / Min-Max Convex Combination | Unified Combined Score | In-Memory (Zero Copy) | $< 0.05\text{ ms}$ |
 #
 # ---
 #
@@ -770,9 +774,7 @@ def plot_alpha_sensitivity_sweep(
         top1_correct = 0
         for tid, s_res, d_res in precomputed_cases:
             fused = convex_score_fusion(
-                s_res, d_res, alpha=float(a),
-                sparse_stats=(bm25.corpus_mean, bm25.corpus_std),
-                dense_stats=(dense.corpus_mean, dense.corpus_std),
+                s_res, d_res, alpha=float(a), method="minmax"
             )
             top3_ids = [doc_id for doc_id, _ in fused[:3]]
             
@@ -799,17 +801,15 @@ def plot_alpha_sensitivity_sweep(
     s_scores = bm25.search(sample_query, top_k=len(bm25.doc_ids))
     d_scores = dense.search(sample_query, top_k=len(dense.doc_ids))
     
-    # Deterministic order-preserving candidate ID union
-    cand_ids = list(dict.fromkeys([doc_id for doc_id, _ in s_scores] + [doc_id for doc_id, _ in d_scores]))
+    # Deterministic alphabetical candidate ID union
+    cand_ids = sorted(set([doc_id for doc_id, _ in s_scores] + [doc_id for doc_id, _ in d_scores]))
 
     doc_trajectories = {doc_id: [] for doc_id in cand_ids}
     doc_ranks = {doc_id: [] for doc_id in cand_ids}
 
     for a in alphas:
         fused = convex_score_fusion(
-            s_scores, d_scores, alpha=float(a),
-            sparse_stats=(bm25.corpus_mean, bm25.corpus_std),
-            dense_stats=(dense.corpus_mean, dense.corpus_std),
+            s_scores, d_scores, alpha=float(a), method="minmax"
         )
         score_map = dict(fused)
         rank_map = {doc_id: i + 1 for i, (doc_id, _) in enumerate(fused)}
@@ -817,25 +817,25 @@ def plot_alpha_sensitivity_sweep(
             doc_trajectories[doc_id].append(score_map.get(doc_id, 0.0))
             doc_ranks[doc_id].append(rank_map.get(doc_id, len(fused)))
 
-    # Compute analytical crossover points between candidate documents
-    # Linear equation: S_d(α) = b_d + m_d * α, where b_d = Z_s(d), m_d = Z_d(d) - Z_s(d)
-    fused_alpha0 = dict(convex_score_fusion(s_scores, d_scores, alpha=0.0, sparse_stats=(bm25.corpus_mean, bm25.corpus_std), dense_stats=(dense.corpus_mean, dense.corpus_std)))
-    fused_alpha1 = dict(convex_score_fusion(s_scores, d_scores, alpha=1.0, sparse_stats=(bm25.corpus_mean, bm25.corpus_std), dense_stats=(dense.corpus_mean, dense.corpus_std)))
+    # Compute analytical crossover points between candidate documents under Min-Max scaling:
+    # S_d(α) = (1 - α) * S_norm_s + α * S_norm_d = S_norm_s + α * (S_norm_d - S_norm_s)
+    fused_alpha0 = dict(convex_score_fusion(s_scores, d_scores, alpha=0.0, method="minmax"))
+    fused_alpha1 = dict(convex_score_fusion(s_scores, d_scores, alpha=1.0, method="minmax"))
     
     crossovers = []
-    target_z_s = fused_alpha0.get(target_doc_id, 0.0)
-    target_z_d = fused_alpha1.get(target_doc_id, 0.0)
-    target_slope = target_z_d - target_z_s
+    target_s0 = fused_alpha0.get(target_doc_id, 0.0)
+    target_s1 = fused_alpha1.get(target_doc_id, 0.0)
+    target_slope = target_s1 - target_s0
 
     for doc_id in cand_ids:
         if doc_id == target_doc_id:
             continue
-        comp_z_s = fused_alpha0.get(doc_id, 0.0)
-        comp_z_d = fused_alpha1.get(doc_id, 0.0)
-        comp_slope = comp_z_d - comp_z_s
+        comp_s0 = fused_alpha0.get(doc_id, 0.0)
+        comp_s1 = fused_alpha1.get(doc_id, 0.0)
+        comp_slope = comp_s1 - comp_s0
         denom = target_slope - comp_slope
         if abs(denom) > 1e-9:
-            alpha_cross = (comp_z_s - target_z_s) / denom
+            alpha_cross = (comp_s0 - target_s0) / denom
             if 0.01 <= alpha_cross <= 0.99:
                 crossovers.append((float(alpha_cross), doc_id))
 
@@ -1012,7 +1012,7 @@ def plot_alpha_sensitivity_sweep(
     fig.update_xaxes(title_text="Dense Fusion Weight (α)", range=[-0.02, 1.02], row=1, col=1)
     fig.update_xaxes(title_text="Dense Fusion Weight (α)", range=[-0.02, 1.02], row=1, col=2)
     fig.update_yaxes(title_text="Retrieval Metric", range=[0.60, 1.05], row=1, col=1)
-    fig.update_yaxes(title_text="Standardized Combined Score", row=1, col=2)
+    fig.update_yaxes(title_text="Normalized Combined Score", range=[-0.02, 1.05], row=1, col=2)
 
     display(HTML(fig.to_html(include_plotlyjs="cdn", full_html=False)))
 
@@ -1034,7 +1034,7 @@ plot_alpha_sensitivity_sweep(bm25_searcher, dense_engine, eval_test_suite)
 # - Leveraged the standard **`rank_bm25.BM25Okapi`** library for exact keyword matching, Robertson-Spärck Jones inverse document frequency, and document length normalization with distribution anchoring.
 # - Implemented a neural **Dense Embedding Engine** utilizing `sentence-transformers` (`google/embeddinggemma-300m`), explicit $L_2$ normalization onto $\mathbb{S}^{D-1}$, and vectorized cosine retrieval via `torch.mv()`.
 # - Established the **Out-of-Vocabulary (OOV) Orthogonality Theoretical Bridge**, explaining how subword fragmentation projects exact alphanumeric identifiers into orthogonal vector coordinates, motivating hybrid fusion.
-# - Constructed **Reciprocal Rank Fusion (RRF)**, **Standardized Convex Score Fusion**, and **Continuous MLP Query Intent Routing**, achieving optimal retrieval across failure-mode unit tests.
+# - Constructed **Reciprocal Rank Fusion (RRF)**, **Min-Max Convex Score Fusion**, and **Continuous MLP Query Intent Routing**, achieving optimal retrieval across failure-mode unit tests.
 # - Synthesized the comprehensive **Hybrid Fusion Decision Matrix** and visualized the continuous dense/sparse sensitivity and document crossover dynamics across $\alpha \in [0, 1]$.
 #
 # In **Module 03**, we scale dense vector search to millions of embeddings using the industry-standard **FAISS** library (`faiss.IndexFlatIP`, `faiss.IndexIVFFlat`, `faiss.IndexHNSWFlat`, and `faiss.IndexPQ`).
