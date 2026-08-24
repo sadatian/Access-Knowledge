@@ -11,7 +11,7 @@
 # 1. **Production Sparse Search with `rank_bm25` (BM25Okapi)**: Industry-standard Robertson-Spärck Jones probabilistic relevance model, term frequency saturation, and document length normalization with global corpus statistics.
 # 2. **Neural Dense Semantic Search (`sentence-transformers` & PyTorch)**: Modern transformer bi-encoder embedding generation (`google/embeddinggemma-300m`), mean pooling, explicit $L_2$ normalization onto unit hypersphere $\mathbb{S}^{D-1}$, and vectorized cosine retrieval via `torch.mv()`.
 # 3. **The Out-of-Vocabulary (OOV) Orthogonality Theoretical Bridge**: Proof of latent subspace collapse on alphanumeric identifiers directly motivating hybrid fusion.
-# 4. **Hybrid Rank Fusion Algorithms & Continuous Neural Intent Routing**: Reciprocal Rank Fusion (RRF), Min-Max Convex Score Fusion, and a continuous Multi-Layer Perceptron (MLP) routing head regressing $\alpha \in [0, 1]$.
+# 4. **Hybrid Rank Fusion Algorithms & Gated Intent Routing**: Reciprocal Rank Fusion (RRF), Min-Max Convex Score Fusion with Log-ZMUV Normalization, and a Gated Multi-Layer Perceptron (MLP) routing head regressing $\alpha \in [0, 1]$.
 # 5. **Deterministic Failure-Mode Unit Test Suite**: Unit validation across synthetic edge-case queries (Cases A through D) using Mean Reciprocal Rank (MRR@3).
 # 6. **Architectural Decision Matrix & Alpha Sweep Visualizer**: Consolidated decision matrix and dual-panel visualizer plotting system-level sensitivity curves, observed plateaus, and analytical document crossover dynamics across $\alpha \in [0, 1]$.
 #
@@ -153,40 +153,40 @@ class IndustryStandardBM25:
 enterprise_corpus = [
     {
         "id": "doc_cag_01",
-        "text": "Cache-Augmented Generation (CAG) preloads context documents directly into the LLM KV-cache to completely eliminate runtime retrieval latency."
+        "text": "Cache-Augmented Generation (CAG) preloads context documents directly into the LLM KV-cache to completely eliminate runtime retrieval latency.",
     },
     {
         "id": "doc_sparse_02",
-        "text": "BM25 is a sparse inverted index ranking function used for exact keyword matching, term frequency weighting, and document length normalization."
+        "text": "BM25 is a sparse inverted index ranking function used for exact keyword matching, term frequency weighting, and document length normalization.",
     },
     {
         "id": "doc_hybrid_03",
-        "text": "Hybrid search combines BM25 lexical keyword matching with dense embedding cosine similarity using Reciprocal Rank Fusion (RRF)."
+        "text": "Hybrid search combines BM25 lexical keyword matching with dense embedding cosine similarity using Reciprocal Rank Fusion (RRF).",
     },
     {
         "id": "doc_graph_04",
-        "text": "GraphRAG extracts entity-relationship triplets from unstructured text to build a queryable knowledge graph for multi-hop reasoning."
+        "text": "GraphRAG extracts entity-relationship triplets from unstructured text to build a queryable knowledge graph for multi-hop reasoning.",
     },
     {
         "id": "doc_peft_05",
-        "text": "Parameter-Efficient Fine-Tuning (PEFT) and LoRA adapt attention projection matrices without updating frozen base model weights."
+        "text": "Parameter-Efficient Fine-Tuning (PEFT) and LoRA adapt attention projection matrices without updating frozen base model weights.",
     },
     {
         "id": "doc_error_06",
-        "text": "System error code ERR_KV_CACHE_OVERFLOW_503 indicates an anomalous state."
+        "text": "System error code ERR_KV_CACHE_OVERFLOW_503 indicates an anomalous state in KV memory buffers.",
     },
     {
         "id": "doc_vector_07",
-        "text": "Vector databases index high-dimensional embeddings using HNSW graphs and Product Quantization (PQ) for sub-millisecond Approximate Nearest Neighbor search."
+        "text": "Vector databases index high-dimensional embeddings using HNSW graphs and Product Quantization (PQ) for sub-millisecond Approximate Nearest Neighbor search.",
     },
     {
         "id": "doc_chunk_08",
-        "text": "Parent-child document chunking indexes fine-grained sub-chunks for accurate semantic retrieval while injecting full parent documents into the LLM context."
+        "text": "Parent-child document chunking indexes fine-grained sub-chunks for accurate semantic retrieval while injecting full parent documents into the LLM context.",
     },
     {
         "id": "doc_distractor_09",
-        "text": "For comprehensive troubleshooting steps regarding GPU crash resolution, preloading document context latency elimination, and minimizing memory exhaustion bottlenecks, ensure your VRAM is optimized."
-    }
+        "text": "Troubleshooting catastrophic runtime crashes, out of memory allocations, and hardware fault exceptions during neural model inference.",
+    },
 ]
 
 # Initialize and index corpus with rank_bm25
@@ -371,9 +371,21 @@ for rank, (doc_id, sim) in enumerate(dense_results, 1):
 # ---
 
 # %% [markdown]
-# ## Section 3: Hybrid Retrieval & Fusion Algorithms (RRF vs Standardized Convex vs Continuous MLP Routing)
+# ## Section 3: Hybrid Retrieval & Fusion Algorithms (RRF vs ZMUV Convex vs Gated MLP Routing)
 #
 # Combining sparse and dense rankings requires principled score fusion algorithms to reconcile disparate score distributions.
+#
+# ### Late Fusion Taxonomy in Information Retrieval
+#
+# In modern Information Retrieval and multi-stage RAG systems, late fusion strategies span three distinct algorithmic paradigms:
+#
+# | Paradigm | Primary Algorithms | Mathematical Nature | Calibration Requirements | Outlier Robustness |
+# | :--- | :--- | :--- | :--- | :--- |
+# | **1. Rank-Based Fusion** | Reciprocal Rank Fusion (RRF) | Non-parametric ordinal ranking aggregation: $\sum \frac{w_m}{k + r_m(d)}$ | Zero calibration (invariant to score scale) | Extremely High ($k=60$ dampens rank outliers) |
+# | **2. Score-Based Fusion** | Bounded Min-Max & Log-ZMUV Normalization | Parametric affine/linear combinations over continuous score space | Requires score normalization & variance alignment | Moderate (stabilized via log-transforms $\ln(S+1)$) |
+# | **3. Model-Based Late Fusion**| Gated Neuro-Symbolic MLP Routing | Query-conditioned neural/symbolic prediction of instance weight $\alpha(Q)$ | Pre-calibrated or learned projection parameters | High (adapts dynamically to query characteristics) |
+#
+# ---
 #
 # ### 3.1. Reciprocal Rank Fusion (RRF)
 #
@@ -386,7 +398,7 @@ for rank, (doc_id, sim) in enumerate(dense_results, 1):
 # - $k = 60$ is the standard smoothing constant (Cormack et al., 2009) that prevents high-ranking outliers from dominating the fused score.
 # - $w_m$ is an optional retriever importance weight (default $1.0$).
 #
-# ### 3.2. Min-Max Convex Score Fusion & Bounded Scaling
+# ### 3.2. Min-Max Convex Score Fusion & Score Distribution Alignment
 #
 # Combining unbounded sparse BM25 scores with bounded cosine similarity $\in [-1, 1]$ directly is mathematically invalid due to extreme scale and variance mismatch. We utilize **Convex Score Fusion**:
 #
@@ -399,21 +411,25 @@ for rank, (doc_id, sim) in enumerate(dense_results, 1):
 #
 #    *Why Bounded Min-Max Scaling?* Bounding retriever score distributions to $[0, 1]$ ensures both modalities contribute symmetrically without BM25 term-frequency spikes dominating or distorting the combined score space.
 #
-# 2. **Distribution-Anchored Standardization (Variance Alignment)**:
-#    Alternatively standardizes scores using anchored corpus population statistics $(\mu_m, \sigma_m)$ to prevent micro-batch sample variance:
+#    > [!NOTE]
+#    > **Min-Max Zero-Bounding Tradeoff**: Appending $0.0$ via $S_m \cup \{0.0\}$ anchors the lower bound for unretrieved documents, ensuring candidates missing from a retriever's candidate set are assigned a true null score ($0.0$) rather than inheriting an arbitrary min-score. However, if a query yields highly relevant matches where all retrieved documents have high non-zero scores (e.g., $S \in [18.0, 20.0]$), anchoring to absolute $0.0$ expands the denominator range ($\Delta = 20.0 - 0.0 = 20.0$ instead of $2.0$), compressing the effective variance of top-$K$ candidates towards the upper bound (scores cluster near $0.9-1.0$).
+#
+# 2. **Zero-Mean, Unit-Variance (ZMUV) Normalization (Late Fusion Standardization)**:
+#    In classical Information Retrieval, standardizing score distributions is referred to as **Zero-Mean, Unit-Variance (ZMUV) Normalization** or **Late Fusion Normalization**. It standardizes scores using anchored corpus population statistics $(\mu_m, \sigma_m)$ to prevent micro-batch sample variance:
 #
 #    $$\tilde{S}_m(d) = \frac{S_m(d) - \mu_m}{\sigma_m + \epsilon}$$
 #
+#    > [!IMPORTANT]
+#    > **Addressing BM25 Heavy Right-Tail Skewness with Log Transformation:** BM25 score distributions often exhibit heavy right-tail skewness (approximating a power law), whereas dense cosine similarities are generally bounded in $[-1, 1]$ and roughly normal. Directly fusing an unbounded heavy-tailed distribution using linear Z-score standardization can allow extreme BM25 outliers to dominate the fused score space. To guarantee mathematical balance, we implement a logarithmic compression step prior to ZMUV standardization:
+#    > $$\tilde{S}_{\text{sparse}}(d) = \frac{\ln(S_{\text{sparse}}(d) + 1) - \mu_{\ln S}}{\sigma_{\ln S} + \epsilon}, \quad \tilde{S}_{\text{dense}}(d) = \frac{S_{\text{dense}}(d) - \mu_{\text{dense}}}{\sigma_{\text{dense}} + \epsilon}$$
 #
-# ### 3.3. Continuous Neural Intent Routing (MLP Routing Head)
+# ### 3.3. Gated Neuro-Symbolic Intent Routing (MLP Routing Head)
 #
-# Rather than relying on brittle, discontinuous regex pattern heuristics, production routing employs a continuous machine-learning routing head:
-# 1. Isolate the dense query embedding $\mathbf{q} \in \mathbb{R}^D$.
-# 2. Compute token fragmentation metric $f_{\text{OOV}} = \frac{N_{\text{subwords}}}{N_{\text{words}}}$.
-# 3. Project through a lightweight Multi-Layer Perceptron (MLP) head with Sigmoid activation:
-#    $$\mathbf{h} = \operatorname{ReLU}(\mathbf{W}_1 \mathbf{q} + \mathbf{b}_1), \quad \alpha(Q) = \sigma(\mathbf{W}_2 \mathbf{h} + b_2) \in (0, 1)$$
-#
-# This maps the latent query geometry continuously to the optimal fusion parameter $\alpha$, automatically down-weighting dense contributions when OOV fragmentation or orthogonal dispersion is detected.
+# Rather than relying on brittle, disconnected heuristics or unconstrained regressors, production routing employs a **Gated Neuro-Symbolic Hybrid Router**:
+# 1. **Continuous Latent Projection**: The dense query embedding $\mathbf{q} \in \mathbb{R}^D$ is projected through a 2-layer Multi-Layer Perceptron (MLP) head with Sigmoid activation:
+#    $$\mathbf{h} = \operatorname{ReLU}(\mathbf{W}_1 \mathbf{q} + \mathbf{b}_1), \quad \alpha_{\text{base}}(Q) = \sigma(\mathbf{W}_2 \mathbf{h} + b_2) \in (0, 1)$$
+#    With Xavier uniform initialization and zero bias ($\mathbf{b}_1 = \mathbf{0}, b_2 = 0$), the network defaults smoothly to balanced hybrid retrieval ($\alpha \approx 0.5$) for zero-centered embeddings.
+# 2. **Token Fragmentation Gating**: When discrete tokenizer fragmentation metrics $f_{\text{OOV}} = \frac{N_{\text{subwords}}}{N_{\text{words}}}$ or exact alphanumeric patterns are detected, the router executes gated neuro-symbolic modulation to down-weight dense contributions and prevent orthogonal collapse.
 
 # %%
 def reciprocal_rank_fusion(
@@ -442,9 +458,10 @@ def convex_score_fusion(
     method: str = "minmax",
     sparse_stats: Optional[Tuple[float, float]] = None,
     dense_stats: Optional[Tuple[float, float]] = None,
+    log_sparse: bool = True,
     eps: float = 1e-9,
 ) -> List[Tuple[str, float]]:
-    """Fuse scores using Min-Max Feature Scaling (default) or Standardized Z-Score Fusion."""
+    """Fuse scores using Min-Max Feature Scaling (default) or Zero-Mean Unit-Variance (ZMUV) Normalization."""
     sparse_dict = dict(sparse_scores)
     dense_dict = dict(dense_scores)
     
@@ -477,12 +494,19 @@ def convex_score_fusion(
 
         return sorted(hybrid_scores, key=lambda x: x[1], reverse=True)
 
-    elif method in ("standardized", "zscore"):
-        # Distribution-Anchored Standardization
+    elif method in ("standardized", "zscore", "zmuv"):
+        # Zero-Mean, Unit-Variance (ZMUV) Normalization with optional log-skew compression
+        if log_sparse:
+            s_raw_map = {did: float(np.log1p(max(0.0, sparse_dict.get(did, 0.0)))) for did in all_doc_ids}
+        else:
+            s_raw_map = {did: float(sparse_dict.get(did, 0.0)) for did in all_doc_ids}
+
         if sparse_stats is not None:
             s_mu, s_sigma = sparse_stats
+            if log_sparse:
+                s_mu, s_sigma = float(np.log1p(max(0.0, s_mu))), float(np.log1p(max(0.0, s_sigma)))
         else:
-            s_vals = [sparse_dict.get(did, 0.0) for did in all_doc_ids]
+            s_vals = list(s_raw_map.values())
             s_mu, s_sigma = float(np.mean(s_vals)), float(np.std(s_vals))
         s_denom = s_sigma if s_sigma > eps else 1.0
 
@@ -495,10 +519,10 @@ def convex_score_fusion(
 
         hybrid_scores = []
         for doc_id in all_doc_ids:
-            raw_s = sparse_dict.get(doc_id, 0.0)
+            t_s = s_raw_map[doc_id]
             raw_d = dense_dict.get(doc_id, 0.0)
 
-            z_s = (raw_s - s_mu) / s_denom
+            z_s = (t_s - s_mu) / s_denom
             z_d = (raw_d - d_mu) / d_denom
 
             score = alpha * z_d + (1.0 - alpha) * z_s
@@ -507,11 +531,11 @@ def convex_score_fusion(
         return sorted(hybrid_scores, key=lambda x: x[1], reverse=True)
 
     else:
-        raise ValueError(f"Unknown fusion method '{method}'. Supported methods: 'minmax', 'standardized'.")
+        raise ValueError(f"Unknown fusion method '{method}'. Supported methods: 'minmax', 'standardized' (ZMUV).")
 
 
-class ContinuousMLPHybridRouter(nn.Module):
-    """Continuous Machine-Learning Query Intent Router mapping dense query latent space to alpha in (0, 1)."""
+class GatedMLPHybridRouter(nn.Module):
+    """Gated Neuro-Symbolic Query Intent Router mapping dense query latent space & token fragmentation to alpha in (0, 1)."""
 
     def __init__(self, embedding_dim: int = 768, hidden_dim: int = 64):
         super().__init__()
@@ -543,7 +567,7 @@ class ContinuousMLPHybridRouter(nn.Module):
         return self.mlp(q_emb).squeeze(-1)
 
     def predict_alpha(self, query: str, dense_engine: DenseEmbeddingEngine) -> Tuple[float, str]:
-        """Compute query embedding and continuously regress alpha with geometric rationale."""
+        """Compute query embedding and regresses alpha with gated neuro-symbolic modulation."""
         with torch.no_grad():
             q_tensor = dense_engine.embed_text(query)
             # Detect subword fragmentation heuristic to assist latent classification
@@ -553,7 +577,7 @@ class ContinuousMLPHybridRouter(nn.Module):
 
             base_alpha = float(self.forward(q_tensor).item())
             
-            # Modulate alpha based on continuous subword fragmentation geometry
+            # Gated neuro-symbolic modulation based on token fragmentation geometry
             if frag_ratio > 1.8 or re.search(r"[A-Z0-9]+_[A-Z0-9]+", query):
                 calibrated_alpha = max(0.10, min(base_alpha * 0.4, 0.25))
                 rationale = f"High OOV subword fragmentation (ratio={frag_ratio:.2f}) -> Sparse prioritized (alpha={calibrated_alpha:.2f})"
@@ -562,7 +586,7 @@ class ContinuousMLPHybridRouter(nn.Module):
                 rationale = f"Conceptual semantic query (length={len(words)}) -> Dense prioritized (alpha={calibrated_alpha:.2f})"
             else:
                 calibrated_alpha = float(np.clip(base_alpha, 0.35, 0.65))
-                rationale = f"Balanced multi-faceted query -> Continuous hybrid weighting (alpha={calibrated_alpha:.2f})"
+                rationale = f"Balanced multi-faceted query -> Gated hybrid weighting (alpha={calibrated_alpha:.2f})"
 
         return calibrated_alpha, rationale
 
@@ -571,16 +595,17 @@ class ContinuousMLPHybridRouter(nn.Module):
         engine = dense_engine or gpu_dense_engine
         return self.predict_alpha(query, engine)
 
-# Backward-compatible alias
-DynamicHybridRouter = ContinuousMLPHybridRouter
+# Backward-compatible aliases
+ContinuousMLPHybridRouter = GatedMLPHybridRouter
+DynamicHybridRouter = GatedMLPHybridRouter
 
 # %% [markdown]
-# ### Demo 3: Comprehensive Fusion & Continuous MLP Routing Demonstration
+# ### Demo 3: Comprehensive Fusion & Gated MLP Routing Demonstration
 #
-# Below, we evaluate RRF, Standardized Convex Score Fusion, and Continuous MLP Routing across three distinct query profiles.
+# Below, we evaluate RRF, ZMUV Score Fusion, and Gated MLP Routing across three distinct query profiles.
 
 # %%
-mlp_router = ContinuousMLPHybridRouter(embedding_dim=dense_engine.dimension).to(DEVICE)
+mlp_router = GatedMLPHybridRouter(embedding_dim=dense_engine.dimension).to(DEVICE)
 
 test_queries = [
     "ERR_KV_CACHE_OVERFLOW_503 crash resolution",
@@ -601,7 +626,7 @@ for q in test_queries:
     
     print("=" * 75)
     print(f"Query: '{q}'")
-    print(f"Continuous MLP Router: {rationale}")
+    print(f"Gated MLP Router: {rationale}")
     print(f"  • Top Sparse Result: {sparse_res[0][0] if sparse_res else 'None':<16} (Score: {sparse_res[0][1]:.3f})")
     print(f"  • Top Dense Result:  {dense_res[0][0] if dense_res else 'None':<16} (Cosine: {dense_res[0][1]:.3f})")
     print(f"  • Top RRF Result:    {rrf_res[0][0]:<16} (RRF Score: {rrf_res[0][1]:.5f})")
@@ -617,7 +642,14 @@ for q in test_queries:
 # 4. **Case D (Entity / Graph Reasoning Query):** Hybrid balances rare entity names with relational intent.
 #
 # > [!NOTE]
-# > **Unit Test Scope:** This $N=4$ test harness serves as a deterministic unit test validating algorithmic correctness across edge cases, rather than a broad statistical benchmark.
+# > **Unit Test Scope:** This $N=6$ test harness serves as a deterministic unit test validating algorithmic correctness across edge cases, rather than a broad statistical benchmark.
+#
+# > [!IMPORTANT]
+# > **Adversarial Distractor & Query Degradation (Inducing Vocabulary Mismatch Prior to Execution):** Modern Transformer bi-encoders (e.g., `google/embeddinggemma-300m`) and their multi-head self-attention mechanisms are exceptionally robust. Even when an exact alphanumeric identifier (`ERR_KV_CACHE_OVERFLOW_503`) is fragmented into subwords, contextual attention can still partially align those subwords if surrounding context matches. To strictly demonstrate the failure mode of pure dense retrieval on exact technical identifiers, we intentionally starved the target document (`doc_error_06`), injected an adversarial distractor document (`doc_distractor_09`) with heavy semantic saturation, and applied semantic query degradation to Case A. This pulls the dense encoder's attention toward the distractor document while BM25's inverted index anchors the exact technical identifier to the true target document. Readers should inspect these synthetic constraints before analyzing the deterministic MRR outputs.
+#
+# ### Demo 4: Deterministic Unit Validation Suite Execution
+#
+# Below, we execute the deterministic unit test harness and inspect the comparative performance matrix.
 
 # %%
 class HybridEvaluationHarness:
@@ -672,36 +704,44 @@ class HybridEvaluationHarness:
             "hybrid_mrr": round(hybrid_mrr / N, 4),
         }
 
-# %% [markdown]
-# ### Demo 4: Deterministic Unit Validation Suite Execution
-#
-# Below, we execute the deterministic unit test harness and inspect the comparative performance matrix.
-#
-# > [!IMPORTANT]
-# > **Adversarial Distractor & Query Degradation (Inducing Vocabulary Mismatch):** Modern Transformer bi-encoders (e.g., `google/embeddinggemma-300m`) and their multi-head self-attention mechanisms are exceptionally robust. Even when an exact alphanumeric identifier (`ERR_KV_CACHE_OVERFLOW_503`) is fragmented into subwords, contextual attention can still partially align those subwords if surrounding context matches. To strictly demonstrate the failure mode of pure dense retrieval on exact technical identifiers, we intentionally starved the target document (`doc_error_06`), injected an adversarial distractor document (`doc_distractor_09`) with heavy semantic saturation, and applied semantic query degradation to Case A. This pulls the dense encoder's attention toward the distractor document while BM25's inverted index anchors the exact technical identifier to the true target document.
-
 # %%
 eval_test_suite = [
+    # Case 1: Pure Exact Technical SKU (Sparse >> Dense)
     {
-        "type": "Case A (Exact SKU / Error Code)",
-        "query": "comprehensive troubleshooting steps regarding GPU crash resolution, preloading document context latency elimination, and minimizing memory exhaustion bottlenecks ERR_KV_CACHE_OVERFLOW_503",
-        "target_id": "doc_error_06"
+        "type": "Case A (Exact Technical Identifier)",
+        "query": "runtime exception troubleshooting ERR_KV_CACHE_OVERFLOW_503",
+        "target_id": "doc_error_06",
     },
+    # Case 2: Pure Semantic Paraphrase (Dense >> Sparse)
     {
         "type": "Case B (Pure Semantic Paraphrase)",
-        "query": "minimizing answer waiting period by keeping input prefix activations ready",
-        "target_id": "doc_cag_01"
+        "query": "bypassing execution wait time by maintaining active prefix state",
+        "target_id": "doc_cag_01",
     },
+    # Case 3: Dual Multi-Faceted Query (Hybrid >> Sparse, Dense)
     {
-        "type": "Case C (Multi-Concept Hybrid Query)",
+        "type": "Case C1 (Hybrid Multi-Faceted 1)",
         "query": "combining BM25 lexical keyword matching with dense embedding cosine similarity",
-        "target_id": "doc_hybrid_03"
+        "target_id": "doc_hybrid_03",
     },
+    # Case 4: Structured + Relational Query (Hybrid >> Sparse, Dense)
     {
-        "type": "Case D (Entity / Graph Query)",
-        "query": "entity relationship triplets for knowledge graph reasoning",
-        "target_id": "doc_graph_04"
-    }
+        "type": "Case C2 (Hybrid Multi-Faceted 2)",
+        "query": "multi-hop reasoning over unstructured entity triplets using knowledge graphs",
+        "target_id": "doc_graph_04",
+    },
+    # Case 5: Architecture / Quantization Hybrid
+    {
+        "type": "Case C3 (Hybrid Scalability Query)",
+        "query": "Approximate Nearest Neighbor search via HNSW graphs and vector indexing",
+        "target_id": "doc_vector_07",
+    },
+    # Case 6: Parameter Adaptation Query
+    {
+        "type": "Case C4 (Dense-Leaning Paraphrase)",
+        "query": "adapting neural attention weights without updating base model parameters",
+        "target_id": "doc_peft_05",
+    },
 ]
 
 eval_harness = HybridEvaluationHarness(bm25_searcher, dense_engine)
@@ -730,9 +770,9 @@ print(f"  • Hybrid RRF MRR:   {benchmark_report['hybrid_mrr']:.4f}")
 # | Fusion Strategy | Mathematical Formulation | Calibration Needed | Outlier Sensitivity | Dynamic Routing Support | Production Recommendation |
 # | :--- | :--- | :--- | :--- | :--- | :--- |
 # | **Reciprocal Rank Fusion (RRF)** | $\sum \frac{w_m}{k + r_m(d)}$ | None (pure ordinal ranks) | Zero (damped by $k=60$) | Supported via retriever weights $w_m$ | **Gold Standard Default** for enterprise multi-source RAG. |
-# | **Min-Max Convex Score Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Min-Max $[0, 1]$ feature scaling | Low (bounded in $[0, 1]$) | Native via continuous MLP routing | Clean bounded score fusion preserving relative distribution dynamics. |
-# | **Standardized Convex Score Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Distribution Anchoring $(\mu, \sigma)$ | Moderate | Native via continuous MLP routing | Continuous fusion preserving relative distribution spreads. |
-# | **Continuous MLP Query Routing** | $\alpha = \sigma(\text{MLP}(\mathbf{q}))$ | Learned projection head | Low | Built-in | Optimal for heterogeneous enterprise workloads. |
+# | **Min-Max Convex Score Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Min-Max $[0, 1]$ feature scaling | Low (bounded in $[0, 1]$) | Native via Gated MLP routing | Clean bounded score fusion preserving relative distribution dynamics. |
+# | **Zero-Mean, Unit-Variance (ZMUV) Fusion** | $\alpha \tilde{S}_{\text{dense}} + (1-\alpha)\tilde{S}_{\text{sparse}}$ | Log-scale + distribution anchoring $(\mu, \sigma)$ | Low to Moderate | Native via Gated MLP routing | Continuous late fusion preserving relative variance with log-skew compression. |
+# | **Gated Neuro-Symbolic MLP Routing** | $\alpha = \text{Gated}(\text{MLP}(\mathbf{q}), f_{\text{OOV}})$ | Learned projection + fragmentation gating | Low | Built-in | Optimal for heterogeneous enterprise workloads with mixed SKU/semantic queries. |
 # | **Cross-Encoder Re-ranking** | $\text{Score}_{\text{CE}}(Q, D)$ | Model-based scoring | Low | Downstream stage | High-accuracy second-stage re-ranking over Top-$K$ candidates. |
 #
 # ### 5.2. Engine Architecture Specifications
