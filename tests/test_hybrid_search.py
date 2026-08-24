@@ -17,6 +17,8 @@ reciprocal_rank_fusion = hybrid_guide.reciprocal_rank_fusion
 convex_score_fusion = hybrid_guide.convex_score_fusion
 DynamicHybridRouter = hybrid_guide.DynamicHybridRouter
 HybridEvaluationHarness = hybrid_guide.HybridEvaluationHarness
+plot_alpha_sensitivity_sweep = hybrid_guide.plot_alpha_sensitivity_sweep
+eval_test_suite = hybrid_guide.eval_test_suite
 
 
 def test_industry_standard_bm25_search():
@@ -73,19 +75,31 @@ def test_convex_score_fusion():
     sparse_scores = [("doc_1", 10.0), ("doc_2", 0.0)]
     dense_scores = [("doc_1", 0.0), ("doc_2", 1.0)]
 
-    # Alpha 0.5 (equal balance)
-    fused_half = convex_score_fusion(sparse_scores, dense_scores, alpha=0.5)
-    fused_dict = dict(fused_half)
-    assert math.isclose(fused_dict["doc_1"], 0.5, abs_tol=1e-5)
-    assert math.isclose(fused_dict["doc_2"], 0.5, abs_tol=1e-5)
+    # Default: Z-Score Standardization (symmetric zero-mean balanced)
+    fused_zscore = convex_score_fusion(sparse_scores, dense_scores, alpha=0.5, method="zscore")
+    fused_dict = dict(fused_zscore)
+    assert math.isclose(fused_dict["doc_1"], 0.0, abs_tol=1e-5)
+    assert math.isclose(fused_dict["doc_2"], 0.0, abs_tol=1e-5)
 
-    # Disjoint retrieval / null-space lower bound test
+    # Dense bias (alpha=0.8) prioritizes doc_2
+    fused_dense_bias = convex_score_fusion(sparse_scores, dense_scores, alpha=0.8, method="zscore")
+    assert fused_dense_bias[0][0] == "doc_2"
+
+    # Sparse bias (alpha=0.2) prioritizes doc_1
+    fused_sparse_bias = convex_score_fusion(sparse_scores, dense_scores, alpha=0.2, method="zscore")
+    assert fused_sparse_bias[0][0] == "doc_1"
+
+    # Min-Max Feature Scaling method
+    fused_minmax = convex_score_fusion(sparse_scores, dense_scores, alpha=0.5, method="minmax")
+    minmax_dict = dict(fused_minmax)
+    assert math.isclose(minmax_dict["doc_1"], 0.5, abs_tol=1e-5)
+    assert math.isclose(minmax_dict["doc_2"], 0.5, abs_tol=1e-5)
+
+    # Disjoint retrieval test
     sparse_only = [("doc_a", 15.0)]
     dense_only = [("doc_b", 0.8)]
     fused_disjoint = convex_score_fusion(sparse_only, dense_only, alpha=0.5)
-    disjoint_dict = dict(fused_disjoint)
-    assert disjoint_dict["doc_a"] >= 0.0
-    assert disjoint_dict["doc_b"] >= 0.0
+    assert len(fused_disjoint) == 2
 
 
 def test_dynamic_hybrid_router():
@@ -115,3 +129,21 @@ def test_hybrid_evaluation_harness():
     report = harness.evaluate_test_cases(test_cases, top_k=2)
     assert report["sparse_mrr"] == 1.0
     assert report["hybrid_mrr"] == 1.0
+
+
+def test_plot_alpha_sensitivity_sweep():
+    docs = [
+        {"id": "doc_1", "text": "Error code ERR_404_NOT_FOUND in web service."},
+        {"id": "doc_2", "text": "Storing precomputed key value states to accelerate inference generation."},
+        {"id": "doc_3", "text": "BM25 inverted indexes rank documents according to term frequency."},
+        {"id": "doc_4", "text": "Graph retrieval traverses relational triplets in knowledge graphs."}
+    ]
+    bm25 = IndustryStandardBM25().index_documents(docs)
+    dense = GPUDenseEmbeddingEngine().index_documents(docs)
+
+    suite = [
+        {"type": "Exact", "query": "ERR_404_NOT_FOUND", "target_id": "doc_1"},
+        {"type": "Paraphrase", "query": "storing precomputed activations", "target_id": "doc_2"},
+    ]
+    # Verify execution consumes suite without raising exceptions
+    plot_alpha_sensitivity_sweep(bm25, dense, suite)
