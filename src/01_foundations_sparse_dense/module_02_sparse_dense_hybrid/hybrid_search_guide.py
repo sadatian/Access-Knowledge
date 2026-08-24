@@ -182,6 +182,10 @@ enterprise_corpus = [
     {
         "id": "doc_chunk_08",
         "text": "Parent-child document chunking indexes fine-grained sub-chunks for accurate semantic retrieval while injecting full parent documents into the LLM context."
+    },
+    {
+        "id": "doc_distractor_09",
+        "text": "To resolve GPU crashes during context preloading and eliminate runtime inference latency, ensure that your batch sizes do not exceed VRAM limits, which often causes generalized memory exhaustion."
     }
 ]
 
@@ -677,7 +681,7 @@ class HybridEvaluationHarness:
 eval_test_suite = [
     {
         "type": "Case A (Exact SKU / Error Code)",
-        "query": "ERR_KV_CACHE_OVERFLOW_503 crash resolution",
+        "query": "preloading document context latency elimination ERR_KV_CACHE_OVERFLOW_503 GPU crash resolution",
         "target_id": "doc_error_06"
     },
     {
